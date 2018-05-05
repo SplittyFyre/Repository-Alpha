@@ -328,6 +328,8 @@ public class Main {
 			
 			
 			
+			//STOP THIS!!!
+			
 			minimap.bindFrameBuffer();
 			engine.renderMiniMapScene(scene);
 			//waterRenderer.render(waters, camera, sun);
