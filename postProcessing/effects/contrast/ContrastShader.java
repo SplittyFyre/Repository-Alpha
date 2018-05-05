@@ -1,6 +1,6 @@
 package postProcessing.effects.contrast;
 
-import shaders.ShaderProgram;
+import renderEngine.ShaderProgram;
 
 public class ContrastShader extends ShaderProgram {
 
@@ -12,7 +12,8 @@ public class ContrastShader extends ShaderProgram {
 	}
 
 	@Override
-	protected void getAllUniformLocations() {	
+	protected void getAllUniformLocations() {
+		
 	}
 
 	@Override

@@ -2,8 +2,6 @@ package water;
 
 import java.util.List;
 
-import models.RawModel;
-
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
@@ -13,9 +11,10 @@ import org.lwjgl.util.vector.Vector3f;
 
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
-import utils.Maths;
-import entities.Camera;
-import entities.Light;
+import renderEngine.models.RawModel;
+import scene.entities.Camera;
+import scene.entities.Light;
+import utils.SFMath;
 
 /**@broken**/
 
@@ -49,7 +48,7 @@ public class WaterRenderer {
 	public void render(List<WaterTile> water, Camera camera, Light sun) {
 		prepareRender(camera, sun);	
 		for (WaterTile tile : water) {
-			Matrix4f modelMatrix = Maths.createTransformationMatrix(
+			Matrix4f modelMatrix = SFMath.createTransformationMatrix(
 					new Vector3f(tile.getX(), tile.getHeight(), tile.getZ()), 0, 0, 0,
 					WaterTile.TILE_SIZE);
 			shader.loadModelMatrix(modelMatrix);

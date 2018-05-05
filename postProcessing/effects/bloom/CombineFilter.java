@@ -32,5 +32,5 @@ public class CombineFilter {
 		renderer.cleanUp();
 		shader.cleanUp();
 	}
-
+	
 }

@@ -5,13 +5,13 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
-import models.RawModel;
 import postProcessing.effects.bloom.BrightFilter;
 import postProcessing.effects.bloom.CombineFilter;
 import postProcessing.effects.contrast.ContrastModification;
 import postProcessing.effects.gaussianBlur.HorizontalBlur;
 import postProcessing.effects.gaussianBlur.VerticalBlur;
 import renderEngine.Loader;
+import renderEngine.models.RawModel;
 
 public class PostProcessing {
 	
@@ -22,27 +22,33 @@ public class PostProcessing {
 	private static VerticalBlur vBlur;
 	private static HorizontalBlur hBlur2;
 	private static VerticalBlur vBlur2;
+	//private static HorizontalBlur hBlur3;
+	//private static VerticalBlur vBlur3;
 	private static BrightFilter brightFilter;
 	private static CombineFilter combiner;
 
 	public static void init(Loader loader) {
 		quad = loader.loadToVAO(POSITIONS, 2);
 		contrastMod = new ContrastModification();
-		hBlur = new HorizontalBlur(Display.getWidth() / 5, Display.getHeight() / 5);
-		vBlur = new VerticalBlur(Display.getWidth() / 5, Display.getHeight() / 5);
+		hBlur = new HorizontalBlur(Display.getWidth() / 2, Display.getHeight() / 2);
+		vBlur = new VerticalBlur(Display.getWidth() / 2, Display.getHeight() / 2);
 		hBlur2 = new HorizontalBlur(Display.getWidth() / 8, Display.getHeight() / 8);
 		vBlur2 = new VerticalBlur(Display.getWidth() / 8, Display.getHeight() / 8);
+		//hBlur3 = new HorizontalBlur(Display.getWidth() / 32, Display.getHeight() / 32);
+		//vBlur3 = new VerticalBlur(Display.getWidth() / 32, Display.getHeight() / 32);
 		brightFilter = new BrightFilter(Display.getWidth() / 2, Display.getHeight() / 2);
 		combiner = new CombineFilter();
 	}
 	
-	public static void doPostProcessing(int colourTexture) {
+	public static void doPostProcessing(int colourTexture, int brightTexture) {
 		start();
-		/*brightFilter.render(colourTexture);
-		hBlur.render(brightFilter.getOutputTexture());
+		hBlur.render(brightTexture);
 		vBlur.render(hBlur.getOutputTexture());
-		combiner.render(colourTexture, vBlur.getOutputTexture());*/
-		contrastMod.render(colourTexture);
+		hBlur2.render(vBlur.getOutputTexture());
+		vBlur2.render(hBlur2.getOutputTexture());
+		//hBlur3.render(vBlur2.getOutputTexture());
+		//vBlur3.render(hBlur3.getOutputTexture());
+		combiner.render(colourTexture, vBlur2.getOutputTexture());
 		end();
 	}
 	
@@ -67,6 +73,9 @@ public class PostProcessing {
 		GL20.glDisableVertexAttribArray(0);
 		GL30.glBindVertexArray(0);
 	}
-
+	
+	public static CombineFilter getCombineFilter() {
+		return combiner;
+	}
 
 }

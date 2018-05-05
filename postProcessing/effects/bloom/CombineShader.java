@@ -1,6 +1,6 @@
 package postProcessing.effects.bloom;
 
-import shaders.ShaderProgram;
+import renderEngine.ShaderProgram;
 
 public class CombineShader extends ShaderProgram {
 

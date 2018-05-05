@@ -11,8 +11,8 @@ import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import collision.BoundingBox;
-import models.RawModel;
 import renderEngine.Loader;
+import renderEngine.models.RawModel;
 
 public class OBJParser {
 

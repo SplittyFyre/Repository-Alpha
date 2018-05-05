@@ -7,10 +7,10 @@ out vec4 out_Colour;
 uniform sampler2D colourTexture;
 uniform sampler2D highlightTexture;
 
-void main(void){
-
+void main(void) {
+	
 	vec4 sceneColour = texture(colourTexture, textureCoords);
-	vec4 highlightColour = texture(highlightTexture, textureCoords);
-	out_Colour = sceneColour + highlightColour;
+	vec4 highlightColour =  texture(highlightTexture, textureCoords);
+	out_Colour = sceneColour + highlightColour * 6;
 
 }

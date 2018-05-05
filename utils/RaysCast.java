@@ -7,8 +7,8 @@ import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
-import terrains.Terrain;
-import entities.Camera;
+import scene.entities.Camera;
+import scene.terrain.Terrain;
 
 public class RaysCast {
 
@@ -27,7 +27,7 @@ public class RaysCast {
 	public RaysCast(Camera cam, Matrix4f projection, Terrain terrain) {
 		camera = cam;
 		projectionMatrix = projection;
-		viewMatrix = Maths.createViewMatrix(camera);
+		viewMatrix = SFMath.createViewMatrix(camera);
 		this.terrain = terrain;
 	}
 	
@@ -40,7 +40,7 @@ public class RaysCast {
 	}
 
 	public void update() {
-		viewMatrix = Maths.createViewMatrix(camera);
+		viewMatrix = SFMath.createViewMatrix(camera);
 		currentRay = calculateMouseRay();
 		if (intersectionInRange(0, RAY_RANGE, currentRay)) {
 			currentTerrainPoint = binarySearch(0, 0, RAY_RANGE, currentRay);
@@ -148,6 +148,10 @@ public class RaysCast {
 
 	private Terrain getTerrain(float worldX, float worldZ) {
 		return terrain;
+	}
+	
+	public Camera getCamera() {
+		return camera;
 	}
 
 }

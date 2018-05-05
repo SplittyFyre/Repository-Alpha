@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.EXTTextureFilterAnisotropic;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL13;
@@ -15,20 +16,23 @@ import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GLContext;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 
 import collision.BoundingBox;
 import de.matthiasmann.twl.utils.PNGDecoder;
 import de.matthiasmann.twl.utils.PNGDecoder.Format;
-import models.RawModel;
-import textures.TextureData;
+import renderEngine.models.RawModel;
+import renderEngine.textures.TextureData;
+import utils.SFUT;
 
 public class Loader {
 	
 	private List<Integer> vaos = new ArrayList<Integer>();
 	private List<Integer> vbos = new ArrayList<Integer>();
 	private List<Integer> textures = new ArrayList<Integer>();
+	private float anisoAmout = Math.min(4, GL11.glGetFloat(EXTTextureFilterAnisotropic.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT));
 	
 	public RawModel loadToVAO(float[] positions, float[] textureCoords, float[] normals, int[] indices, BoundingBox aabb){
 		int vaoID = createVAO();
@@ -37,8 +41,23 @@ public class Loader {
 		storeDataInAttributeList(1, 2, textureCoords);
 		storeDataInAttributeList(2, 3, normals);
 		unbindVAO();
-		
 		return new RawModel(vaoID, indices.length, aabb);
+	}
+	
+	public int loadVAOID(float[] positions, float[] textureCoords){
+		int vaoID = createVAO();
+		storeDataInAttributeList(0, 2, positions);
+		storeDataInAttributeList(1, 2, textureCoords);
+		unbindVAO();
+		return vaoID;
+	}
+	
+	
+	public RawModel loadToVAO(float[] positions) {
+		int vaoID = createVAO();
+		storeDataInAttributeList(0, 2, positions);
+		unbindVAO();
+		return new RawModel(vaoID, positions.length / 2, null);
 	}
 	
 	private int createVAO() {
@@ -84,6 +103,10 @@ public class Loader {
 			GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
 			GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL14.GL_MAX_TEXTURE_LOD_BIAS, -0.4f);
+			if (GLContext.getCapabilities().GL_EXT_texture_filter_anisotropic)
+				GL11.glTexParameterf(GL11.GL_TEXTURE_2D, EXTTextureFilterAnisotropic.GL_TEXTURE_MAX_ANISOTROPY_EXT, anisoAmout);
+			else
+				SFUT.println("Your driver does not support Anisotropic Filtering");
 			
 		} catch (Exception e) {
 			e.printStackTrace();

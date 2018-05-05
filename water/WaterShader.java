@@ -2,10 +2,10 @@ package water;
 
 import org.lwjgl.util.vector.Matrix4f;
 
-import shaders.ShaderProgram;
-import utils.Maths;
-import entities.Camera;
-import entities.Light;
+import renderEngine.ShaderProgram;
+import scene.entities.Camera;
+import scene.entities.Light;
+import utils.SFMath;
 
 /**@broken**/
 
@@ -74,7 +74,7 @@ public class WaterShader extends ShaderProgram {
 	}
 	
 	public void loadViewMatrix(Camera camera){
-		Matrix4f viewMatrix = Maths.createViewMatrix(camera);
+		Matrix4f viewMatrix = SFMath.createViewMatrix(camera);
 		loadMatrix(location_viewMatrix, viewMatrix);
 		super.loadVector(location_cameraPosition, camera.getPosition());
 	}

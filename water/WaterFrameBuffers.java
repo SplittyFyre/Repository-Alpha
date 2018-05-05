@@ -15,8 +15,8 @@ public class WaterFrameBuffers {
 	protected static final int REFLECTION_WIDTH = 320;
 	private static final int REFLECTION_HEIGHT = 180;
 	
-	protected static final int REFRACTION_WIDTH = 1280;
-	private static final int REFRACTION_HEIGHT = 720;
+	protected static final int REFRACTION_WIDTH = 3200;
+	private static final int REFRACTION_HEIGHT = 1800;
 
 	private int reflectionFrameBuffer;
 	private int reflectionTexture;

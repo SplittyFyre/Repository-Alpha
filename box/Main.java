@@ -1,31 +1,44 @@
 package box;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL30;
+import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
+import org.lwjgl.util.vector.Vector4f;
 
 import collision.CollisionManager;
-import entities.BorgVessel;
-import entities.Camera;
-import entities.Entity;
-import entities.Light;
-import entities.players.PlayerWarshipVoyager;
-import models.RawModel;
-import models.TexturedModel;
+import fontMeshCreator.FontType;
+import fontMeshCreator.GUIText;
+import fontRendering.TextMaster;
+import gameplay.minimap.MinimapFX;
 import objStuff.OBJParser;
-import particles.ParticleWatcher;
 import postProcessing.Fbo;
 import postProcessing.PostProcessing;
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
-import renderEngine.MasterRenderer;
-import terrains.Terrain;
-import textures.ModelTexture;
-import textures.TerrainTexture;
-import textures.TerrainTexturePack;
+import renderEngine.RenderEngine;
+import renderEngine.guis.render.GUIRenderer;
+import renderEngine.models.RawModel;
+import renderEngine.models.TexturedModel;
+import renderEngine.textures.GUITexture;
+import renderEngine.textures.ModelTexture;
+import renderEngine.textures.TerrainTexture;
+import renderEngine.textures.TerrainTexturePack;
+import scene.Scene;
+import scene.entities.BorgVessel;
+import scene.entities.Camera;
+import scene.entities.Entity;
+import scene.entities.Light;
+import scene.entities.players.PlayerWarshipVoyager;
+import scene.particles.ParticleWatcher;
+import scene.terrain.Terrain;
 import utils.RaysCast;
 import water.WaterFrameBuffers;
 import water.WaterRenderer;
@@ -37,9 +50,15 @@ public class Main {
 	private static List<Entity> entities = new ArrayList<Entity>();
 	private static List<Entity> planets = new ArrayList<Entity>();
 	private static List<Entity> enemies = new ArrayList<Entity>();
+	private static List<Entity> allEntities = new ArrayList<Entity>();
 	
-	public static List<List<Entity>> scene = new ArrayList<List<Entity>>();
-	public static List<Entity> flatScene = new ArrayList<Entity>();
+	private static final int MAP = 0;
+	private static final int AFT = 1;
+	private static int viewScreenMode = 1;
+	
+	public static void screenFBOMode(int param) {
+		viewScreenMode = param;
+	}
 	
 	public static void main(String[] args) {
 		
@@ -50,8 +69,10 @@ public class Main {
 		DisplayManager.createDisplay();
 		
 		Loader loader = new Loader();
-		MasterRenderer renderer = new MasterRenderer(loader);
-		ParticleWatcher.init(loader, renderer.getProjectionMatrix());
+		TextMaster.init(loader);
+		RenderEngine engine = RenderEngine.init();
+		ParticleWatcher.init(loader, engine.getProjectionMatrix());
+		Scene scene = new Scene();
 		
 		//TERRAIN TEXTURE********************************************************************
 		
@@ -89,6 +110,8 @@ public class Main {
 		
 		RawModel voyagerRaw = OBJParser.loadObjModel("warship_voyager_model", loader);
 		TexturedModel voyagerShip = new TexturedModel(voyagerRaw, new ModelTexture(loader.loadTexture("warship_voyager_texture")));
+		voyagerShip.getTexture().setSpecularMap(loader.loadTexture("warship_voyager_glowMap"));
+		voyagerShip.getTexture().setBrightDamper(3);
 		
 		//PINE TREES*************************************************************************
 		
@@ -109,6 +132,13 @@ public class Main {
 		
 		RawModel pretorpedo = OBJParser.loadObjModel("photon", loader);
 		TexturedModel torpedo = new TexturedModel(pretorpedo, new ModelTexture(loader.loadTexture("photon")));
+		TexturedModel specialTorpedo = new TexturedModel(pretorpedo, new ModelTexture(loader.loadTexture("quantum")));
+		
+		torpedo.getTexture().setSpecularMap(loader.loadTexture("allGlow"));
+		torpedo.getTexture().setBrightDamper(0);
+		specialTorpedo.getTexture().setUseFakeLighting(true);
+		specialTorpedo.getTexture().setSpecularMap(loader.loadTexture("allGlow"));
+		specialTorpedo.getTexture().setBrightDamper(0);
 		
 		//BOLTS******************************************************************************
 		
@@ -121,6 +151,8 @@ public class Main {
 		RawModel prephaser = OBJParser.loadObjModel("bolt", loader);
 		TexturedModel phaser = new TexturedModel(prephaser, new ModelTexture(loader.loadTexture("orange")));
 		phaser.getTexture().setUseFakeLighting(true);
+		phaser.getTexture().setSpecularMap(loader.loadTexture("allGlow"));
+		phaser.getTexture().setBrightDamper(2);
 		
 		//BULLETS****************************************************************************
 		
@@ -137,13 +169,14 @@ public class Main {
 		
 		RawModel borgRaw = OBJParser.loadObjModel("borge", loader);
 		TexturedModel borgShip = new TexturedModel(borgRaw, new ModelTexture(loader.loadTexture("borge")));
-		borgShip.getTexture().setUseFakeLighting(true);
+		borgShip.getTexture().setSpecularMap(loader.loadTexture("borge_glowMap"));
+		borgShip.getTexture().setBrightDamper(2);
 		
 		//END TEXTURE SECTION****************************************************************
 		
 		Random random = new Random();
 		
-		Light sun = new Light(new Vector3f(10000, 10000, -10000), new Vector3f(1.3f, 1.3f, 1.3f));
+		Light sun = new Light(new Vector3f(-600, 1200, 600), new Vector3f(1.3f, 1.3f, 1.3f));
 		lights.add(sun);
 		
 		for (int i = 0; i < 3; i++) {
@@ -152,76 +185,178 @@ public class Main {
 			lights.add(light);
 		}
 		
-		PlayerWarshipVoyager player = new PlayerWarshipVoyager(voyagerShip, new Vector3f(0, 0, 0), 0, 0, 0, 10);
+		List<GUITexture> guis = new ArrayList<GUITexture>();
+		
+		PlayerWarshipVoyager player = new PlayerWarshipVoyager(voyagerShip, new Vector3f(0, 0, 0), 0, 0, 0, 10, guis);
 		entities.add(player);
 		
 		//OTHER UTILS************************************************************************
 		
 		Camera camera = new Camera(player);
-		RaysCast caster = new RaysCast(camera, renderer.getProjectionMatrix(), terrain);
+		RaysCast caster = new RaysCast(camera, engine.getProjectionMatrix(), terrain);
 		
 		//SPECIAL WATER COMPONENTS***********************************************************
 		
 		WaterFrameBuffers buffers = new WaterFrameBuffers();
 		WaterShader waterShader = new WaterShader();
-		WaterRenderer waterRenderer = new WaterRenderer(loader, waterShader, renderer.getProjectionMatrix(), buffers);
-		waters.add(new WaterTile(100, 20, -50));
+		WaterRenderer waterRenderer = new WaterRenderer(loader, waterShader, engine.getProjectionMatrix(), buffers);
+		WaterTile water = new WaterTile(terrain.getX() + 2400, terrain.getZ() + 2400, 0);
+		waters.add(water);
 		
 		//ADDING RANDOM STUFF (PLACE HOLDER?)*************************************************
 		
-		for (int i = 0; i < 50; i++) {
-			
-			BorgVessel borj = new BorgVessel(borgShip, new Vector3f(random.nextFloat() * 1000, random.nextFloat() * 1000, random.nextFloat() * 1000), 0, 0, 0, 10);
-			enemies.add(borj);
-			
-		}
-		
-		enemies.add(new BorgVessel(borgShip, new Vector3f(0, 0, 0), 0, 0, 0, 10));
+		BorgVessel borj = new BorgVessel(borgShip, new Vector3f(1000, 0, 1000), 0, 0, 0, 300);
+		enemies.add(borj);
 		
 		for (int i = 0; i < 69; i++) {
 			
-			BorgVessel borj = new BorgVessel(borgShip, new Vector3f(random.nextFloat() * 1000, random.nextFloat() * 100, random.nextFloat() * 1000), 0, 0, 0, 10);
-			enemies.add(borj);
+			BorgVessel borj2 = new BorgVessel(borgShip, new Vector3f(random.nextFloat() * 100000, random.nextFloat() 
+					* 100, random.nextFloat() * 100000), 0, 0, 0, 300);
+			enemies.add(borj2);
 		}
 
 		Fbo fbo = new Fbo(Display.getWidth(), Display.getHeight());
 		Fbo output = new Fbo(Display.getWidth(), Display.getHeight(), Fbo.DEPTH_TEXTURE);
+		Fbo output2 = new Fbo(Display.getWidth(), Display.getHeight(), Fbo.DEPTH_TEXTURE);
+		Fbo minimap = new Fbo(Display.getWidth(), Display.getHeight(), Fbo.DEPTH_TEXTURE);
+		Fbo mmout = new Fbo(Display.getWidth(), Display.getHeight(), Fbo.DEPTH_TEXTURE);
 		PostProcessing.init(loader);
+		
+		MinimapFX mmfx = new MinimapFX();
+		GUITexture viewsceen = new GUITexture(mmfx.getOutputTexture(), new Vector2f(0.75f, 0.7f), new Vector2f(0.3f, 0.3f), 180);
+		guis.add(viewsceen);
+		
+		GUIRenderer guiRenderer = new GUIRenderer(loader);
 		
 		/**MAIN GAME LOOP*******************************************************************
 		   MAIN GAME LOOP*******************************************************************
 		   MAIN GAME LOOP*******************************************************************/
 		
+		FontType generalFont = new FontType(loader.loadTexture("segoe"), new File("res/segoe.fnt"));
+		GUIText coordsX = new GUIText("Loading...", 1.7f, generalFont, new Vector2f(0, 0), 0.5f, false);
+		GUIText coordsY = new GUIText("Loading...", 1.7f, generalFont, new Vector2f(0, 0.05f), 0.5f, false);
+		GUIText coordsZ = new GUIText("Loading...", 1.7f, generalFont, new Vector2f(0, 0.1f), 0.5f, false);
+		GUIText temp = new GUIText("", 3.5f, generalFont, new Vector2f(0.1f, 0.2f), 1, true);
+		GUIText phaserEnergy = new GUIText("", 3f, generalFont, new Vector2f(0.35f, 0.05f), 0.5f, false);
+		coordsX.setColour(0, 1, 0);
+		coordsY.setColour(0, 1, 0);
+		coordsZ.setColour(0, 1, 0);
+		temp.setColour(1, 0, 0);
+		phaserEnergy.setColour(1, 0, 1);
+		//phaserEnergy.setText("Made By: Oscar Xu");
+		
 		while (!Display.isCloseRequested()) {
-
+			
 			//player.update(caster, torpedo, bolt, celestial_object);
 			//player.update(bullet, bolt);
-			player.update(phaser, caster);
+			player.update(caster);
 			camera.move();
 			caster.update();
 			ParticleWatcher.update();
 			
-			scene.add(entities);
-			scene.add(enemies);
-			scene.add(player.projectiles);
+			coordsX.setText(Float.toString(player.getPosition().x));
+			coordsY.setText(Float.toString(player.getPosition().y));
+			coordsZ.setText(Float.toString(player.getPosition().z));
+			//SFUT.println(borj.getBoundingBox().maxX - borj.getBoundingBox().minX);
+			allEntities.clear();
+			allEntities.addAll(enemies);
+			allEntities.addAll(entities);
+			allEntities.addAll(player.projectiles);
 			
-			flatScene.clear();
-			flatScene.addAll(enemies);
-			flatScene.addAll(entities);
-			flatScene.addAll(player.projectiles);
+			scene.setEntityList(allEntities);
+			scene.setCamera(camera);
+			scene.setTerrainList(terrains);
+			scene.setLightList(lights);
+			
+			if (Keyboard.isKeyDown(Keyboard.KEY_C)) {
+				viewsceen.getScale().x += 0.01f;
+				viewsceen.getPosition().x += 0.01f;
+			}
+			else if (Keyboard.isKeyDown(Keyboard.KEY_V)) {
+				viewsceen.getScale().x -= 0.01f;
+				viewsceen.getPosition().x -= 0.01f;
+			}
+			
+			if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
+				temp.setText("Attack Pattern : [Sierra]");
+			}
+			
+			if (Keyboard.isKeyDown(Keyboard.KEY_R)) {
+				temp.setText("");
+			}
+			
+			while (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
+				DisplayManager.updateDisplay();
+			}
+			
+			GL11.glEnable(GL30.GL_CLIP_DISTANCE0);
+			scene.setClipPlanePointer(new Vector4f(0, -1, 0, 15));
+			buffers.bindReflectionFrameBuffer();
+			float distance = 2 * (camera.getPosition().y - water.getHeight());
+			camera.getPosition().y -= distance;
+			camera.invertPitch();
+			scene.setClipPlanePointer(new Vector4f(0, 1, 0, -water.getHeight() + 0.5f));
+			engine.renderScene(scene);
+			camera.getPosition().y += distance;
+			camera.invertPitch();
+			buffers.bindRefractionFrameBuffer();
+			scene.setClipPlanePointer(new Vector4f(0, -1, 0, water.getHeight() + 0.5f));
+			engine.renderScene(scene);
+			buffers.unbindCurrentFrameBuffer();
+			GL11.glDisable(GL30.GL_CLIP_DISTANCE0);
+			
+			TaskManager.vec31 = camera.getPosition();
+			TaskManager.f1 = camera.getPitch();
+			TaskManager.f2 = camera.getYaw();
+			TaskManager.f3 = camera.getRoll();
+			TaskManager.f4 = camera.getDistanceFrom();
+			
+			switch (viewScreenMode) {
+			
+			case MAP:
+				camera.setPosition(new Vector3f(player.getPosition().x, player.getPosition().y + 5000, player.getPosition().z));
+				camera.setPitch(90);
+				break;
+				
+			case AFT:
+				camera.setDistanceFrom(30);
+				camera.setYaw(camera.getYaw() + 180);
+				camera.setPitch(0);
+				break;
+			
+			}
+			
+			
+			
+			minimap.bindFrameBuffer();
+			engine.renderMiniMapScene(scene);
+			//waterRenderer.render(waters, camera, sun);
+			minimap.unbindFrameBuffer();
+			
+			minimap.resolveToFbo(GL30.GL_COLOR_ATTACHMENT0, mmout);
+			mmfx.processMinimap(mmout.getColourTexture());
+			
+			camera.setPosition(new Vector3f(TaskManager.vec31));
+			camera.setPitch(TaskManager.f1);
+			camera.setYaw(TaskManager.f2);
+			camera.setRoll(TaskManager.f3);
+			camera.setDistanceFrom(TaskManager.f4);
 			
 			fbo.bindFrameBuffer();
 			
 			checkDamageToEnemies();
-			renderer.renderAll(flatScene, terrains, lights, camera);
-			CollisionManager.checkCollisions();
+			engine.renderScene(scene);
+			CollisionManager.checkCollisions(player.projectiles, enemies);
 			waterRenderer.render(waters, camera, sun);
 			ParticleWatcher.renderParticles(camera);
 			
 			fbo.unbindFrameBuffer();
-			fbo.resolveToFbo(output);
-			PostProcessing.doPostProcessing(output.getColourTexture());
 			
+			fbo.resolveToFbo(GL30.GL_COLOR_ATTACHMENT0, output);
+			fbo.resolveToFbo(GL30.GL_COLOR_ATTACHMENT1, output2);
+			PostProcessing.doPostProcessing(output.getColourTexture(), output2.getColourTexture());
+			guiRenderer.render(guis);
+			TextMaster.drawText();
 			DisplayManager.updateDisplay();
 		}
 		
@@ -231,11 +366,17 @@ public class Main {
 		
 		//CLEAN UP***************************************************************************
 		
+		mmfx.cleanUp();
+		
+		TextMaster.cleanUp();
+		buffers.cleanUp();
+		guiRenderer.cleanUp();
 		PostProcessing.cleanUp();
 		fbo.cleanUp();
 		output.cleanUp();
+		output2.cleanUp();
 		waterShader.cleanUp();
-		renderer.cleanUp();
+		engine.cleanUp();
 		loader.cleanUp();
 		ParticleWatcher.cleanUp();
 		DisplayManager.closeDisplay();

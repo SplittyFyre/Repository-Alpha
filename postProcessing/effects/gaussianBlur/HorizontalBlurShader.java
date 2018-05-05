@@ -1,6 +1,6 @@
 package postProcessing.effects.gaussianBlur;
 
-import shaders.ShaderProgram;
+import renderEngine.ShaderProgram;
 
 public class HorizontalBlurShader extends ShaderProgram {
 
