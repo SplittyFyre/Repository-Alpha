@@ -8,8 +8,6 @@ import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL32;
 
-/**@broken**/
-
 public class WaterFrameBuffers {
 
 	protected static final int REFLECTION_WIDTH = 320;
@@ -61,7 +59,7 @@ public class WaterFrameBuffers {
 		return refractionTexture;
 	}
 	
-	public int getRefractionDepthTexture(){//get the resulting depth texture
+	public int getRefractionDepthTexture(){
 		return refractionDepthTexture;
 	}
 

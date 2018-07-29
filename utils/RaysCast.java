@@ -7,13 +7,14 @@ import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
+import collision.BoundingBox;
 import scene.entities.Camera;
 import scene.terrain.Terrain;
 
 public class RaysCast {
 
 	private static final int RECURSION_COUNT = 200;
-	private static final float RAY_RANGE = 600;
+	private static final float RAY_RANGE = 2400;
 
 	private Vector3f currentRay = new Vector3f();
 
@@ -86,7 +87,7 @@ public class RaysCast {
 	}
 	
 	/**Returns normalized device coordinates using simple calculation, 
-	 * takes in viewport coordinates. This calculations is done automatically
+	 * takes in viewport coordinates. This calculation is done automatically
 	 * by OpenGL when going from normal to viewport**/
 	
 	private Vector2f getNormalisedDeviceCoordinates(float mouseX, float mouseY) {
@@ -94,6 +95,18 @@ public class RaysCast {
 		float y = (2.0f * mouseY) / Display.getHeight() - 1f;
 		
 		return new Vector2f(x, y);
+	}
+	
+	public Vector2f burstFromScreen(Vector3f pos) {
+		
+		Vector4f vec = new Vector4f(pos.x, pos.y, pos.z, 1);
+		
+		vec = Matrix4f.transform(viewMatrix, vec, null);
+		vec = Matrix4f.transform(projectionMatrix, vec, null);
+		
+		// Vector2f 
+		
+		return null;
 	}
 	
 	//**********************************************************
@@ -152,6 +165,55 @@ public class RaysCast {
 	
 	public Camera getCamera() {
 		return camera;
+	}
+	
+	//**********************************************************
+	
+	private static float min(float x, float y) {
+		return ((x) < (y) ? (x) : (y));
+	}
+	
+	private static float max(float x, float y) {
+		return ((x) > (y) ? (x) : (y));
+	}
+	
+	public boolean penetrates(BoundingBox bb) {
+		
+		//float tmin = Float.NEGATIVE_INFINITY, tmax = Float.POSITIVE_INFINITY;
+		
+		Vector3f invdir = new Vector3f(1 / this.getCurrentRay().x, 1 / this.getCurrentRay().y, 1 / this.getCurrentRay().z);
+		
+		float t1 = (bb.minX - this.getCamera().getPosition().x) * invdir.x;
+		float t2 = (bb.maxX - this.getCamera().getPosition().x) * invdir.x;
+		
+		float tmin = Math.min(t1, t2);
+		float tmax = Math.max(t1, t2);
+		
+		//******************************************************
+		
+		//tmin = max(tmin, min(t1, t2));
+		//tmax = min(tmax, max(t1, t2));
+		
+		//******************************************************
+		
+		t1 = (bb.minY - this.getCamera().getPosition().y) * invdir.y;
+		t2 = (bb.maxY - this.getCamera().getPosition().y) * invdir.y;
+		
+		//tmin = Math.max(tmin, Math.min(Math.min(t1, t2), tmax));
+		//tmax = Math.min(tmax, Math.max(Math.max(t1, t2), tmin));
+
+		tmin = Math.max(tmin, Math.min(t1, t2));
+		tmax = Math.min(tmax, Math.max(t1, t2));
+		
+		//******************************************************
+		
+		t1 = (bb.minZ - this.getCamera().getPosition().z) * invdir.z;
+		t2 = (bb.maxZ - this.getCamera().getPosition().z) * invdir.z;
+		
+		tmin = Math.max(tmin, Math.min(t1, t2));
+		tmax = Math.min(tmax, Math.max(t1, t2));
+		
+		return tmax > Math.max(tmin, 0);
 	}
 
 }

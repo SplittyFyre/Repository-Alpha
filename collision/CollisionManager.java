@@ -2,30 +2,24 @@ package collision;
 
 import java.util.List;
 
-import scene.entities.BorgVessel;
-import scene.entities.Entity;
+import box.Main;
+import scene.entities.entityUtils.ITakeDamage;
+import scene.entities.hostiles.Enemy;
+import scene.entities.players.Player;
 import scene.entities.projectiles.Projectile;
+import utils.RaysCast;
 
 public class CollisionManager {
 	
-	public static void checkCollisions(List<Entity> playerProjectiles, List<Entity> enemies) {
+	public static void checkCollisions(List<Projectile> playerProjectiles, List<Enemy> enemies, Player player, RaysCast caster) {
 		
-		for (Entity projectile : playerProjectiles) {
-			
-			BoundingBox bb1 = projectile.getBoundingBox();
-			
-			for (Entity enemy : enemies) {
-				
-				BoundingBox bb2 = enemy.getBoundingBox();
-				
-				if (bb1.intersects(bb2)) {
-					
-					projectile.respondToCollision();
-					((BorgVessel) enemy).respondToCollisioni(((Projectile) projectile).getDamage());
-				}
-				
+		player.choreCollisions(enemies, caster);
+		
+		for (Projectile projectile : Main.foeprojectiles) {
+			if (projectile.getBoundingBox().intersects(player.getBoundingBox())) {
+				projectile.respondToCollision();
+				((ITakeDamage) player).respondToCollisioni(projectile.getDamage());
 			}
-			
 		}
 		
 	}

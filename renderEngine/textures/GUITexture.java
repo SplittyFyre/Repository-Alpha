@@ -1,8 +1,14 @@
 package renderEngine.textures;
 
+import java.util.List;
+
 import org.lwjgl.util.vector.Vector2f;
 
-public class GUITexture {
+import renderEngine.guis.IGUI;
+
+public class GUITexture implements IGUI {
+	
+	private boolean hidden = true;
 	
 	private int textureID;
 	private Vector2f position;
@@ -53,6 +59,28 @@ public class GUITexture {
 	
 	public void setTexture(int textureID) {
 		this.textureID = textureID;
+	}
+
+	@Override
+	@Deprecated
+	public void update() {
+		
+	}
+
+	@Override
+	public void hide(List<GUITexture> textures) {
+		if (!hidden) {
+			textures.remove(this);
+			hidden = true;
+		}
+	}
+
+	@Override
+	public void show(List<GUITexture> textures) {
+		if (hidden) {
+			textures.add(this);
+			hidden = false;
+		}
 	}
 
 }

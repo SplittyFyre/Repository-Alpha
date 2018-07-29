@@ -14,6 +14,9 @@ import scene.entities.projectiles.Bolt;
 import scene.entities.projectiles.Torpedo;
 import scene.particles.ParticleSystem;
 
+/**@deprecated
+ * Unused class**/
+@Deprecated
 public class PlayerApacheSpaceship extends Entity {
 	
 	private List<Torpedo> torpedoes = new ArrayList<Torpedo>();

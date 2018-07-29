@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 
 import org.lwjgl.util.vector.Matrix4f;
 
-import renderEngine.Loader;
 import scene.entities.Camera;
 
 public class ParticleWatcher {
@@ -17,8 +16,8 @@ public class ParticleWatcher {
 	private static Map<ParticleTexture, List<Particle>> particles = new HashMap<ParticleTexture, List<Particle>>();
 	private static ParticleRenderer renderer;
 	
-	public static void init(Loader loader, Matrix4f projectionMatrix) {
-		renderer = new ParticleRenderer(loader, projectionMatrix);
+	public static void init(Matrix4f projectionMatrix) {
+		renderer = new ParticleRenderer(projectionMatrix);
 	}
 	
 	public static void update() {
@@ -40,8 +39,6 @@ public class ParticleWatcher {
 		}
 	}
 
-		
-	
 	public static void renderParticles(Camera camera) {
 		renderer.render(particles, camera);
 	}

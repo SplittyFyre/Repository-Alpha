@@ -12,13 +12,11 @@ import renderEngine.Loader;
 
 public class TextMaster {
 	
-	private static Loader loader;
 	private static Map<FontType, List<GUIText>> texts = new HashMap<FontType, List<GUIText>>();
 	private static FontRenderer renderer;
 	
-	public static void init(Loader inloader) {
+	public static void init() {
 		renderer = new FontRenderer();
-		loader = inloader;
 	}
 	
 	public static void drawText() {
@@ -28,7 +26,7 @@ public class TextMaster {
 	public static void addText(GUIText text) {
 		FontType font = text.getFont();
 		TextMeshData data = font.loadText(text);
-		int vao = loader.loadVAOID(data.getVertexPositions(), data.getTextureCoords());
+		int vao = Loader.loadVAOID(data.getVertexPositions(), data.getTextureCoords());
 		text.setMeshInfo(vao, data.getVertexCount());
 		List<GUIText> textBatch = texts.get(font);
 		if (textBatch == null) {

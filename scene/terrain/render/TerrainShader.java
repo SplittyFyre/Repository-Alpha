@@ -34,8 +34,6 @@ public class TerrainShader extends ShaderProgram{
 	private int location_bTexture;
 	private int location_blendMap;
 	private int location_plane;
-	
-	
 
 	public TerrainShader() {
 		super(VERTEX_FILE, FRAGMENT_FILE);

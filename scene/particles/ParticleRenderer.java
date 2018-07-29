@@ -22,8 +22,8 @@ public class ParticleRenderer {
 	private RawModel quad;
 	private ParticleShader shader;
 	
-	protected ParticleRenderer(Loader loader, Matrix4f projectionMatrix) {
-		quad = loader.loadToVAO(VERTICES, 2);
+	protected ParticleRenderer(Matrix4f projectionMatrix) {
+		quad = Loader.loadToVAO(VERTICES, 2);
 		shader = new ParticleShader();
 		shader.start();
 		shader.loadProjectionMatrix(projectionMatrix);
@@ -39,7 +39,13 @@ public class ParticleRenderer {
 			for (Particle particle : particles.get(texture)) {
 				updateModelViewMatrix(particle.getPosition(), particle.getRotation(), particle.getScale(), viewMatrix);
 				shader.loadTextureCoordInfo(particle.getTexOffSet1(), particle.getTexOffSet2(), texture.getNumberOfRows(), particle.getBlend());
+				if (particle.priority) {
+					GL11.glDisable(GL11.GL_DEPTH_TEST);
+					GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+				}
 				GL11.glDrawArrays(GL11.GL_TRIANGLE_STRIP, 0, quad.getVertexCount());
+				GL11.glEnable(GL11.GL_DEPTH_TEST);
+				GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 			}
 		}
 		finishRendering();

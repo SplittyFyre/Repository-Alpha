@@ -29,7 +29,7 @@ public class MasterRenderSystem {
 		enableFaceCulling();
 		this.entityRenderer = new EntityRenderSystem(projectionMatrix);
 		this.terrainRenderer = new TerrainRenderSystem(projectionMatrix);
-		this.skyboxRenderer = new SkyboxRenderSystem(loader, projectionMatrix);
+		this.skyboxRenderer = new SkyboxRenderSystem(projectionMatrix);
 	}
 	
 	public void renderMainPass(Scene scene) {
@@ -41,6 +41,7 @@ public class MasterRenderSystem {
 		prepare();
 		skyboxRenderer.render(scene.getCamera(), skyR, skyG, skyB);
 		entityRenderer.render(entities, skyR, skyG, skyB, scene.getLights(), scene.getCamera(), scene.getClipPlanePointer());
+		disableFaceCulling();
 		terrainRenderer.render(terrains, skyR, skyG, skyB, scene.getLights(), scene.getCamera(), scene.getClipPlanePointer());
 		//FINISH***********************************************************
 		terrains.clear();
@@ -66,7 +67,7 @@ public class MasterRenderSystem {
 		terrainRenderer.getShaderPointer().cleanUp();
 	}
 	
-	private void prepare() {
+	private static void prepare() {
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		GL11.glClearColor(0, 0, 0, 1);

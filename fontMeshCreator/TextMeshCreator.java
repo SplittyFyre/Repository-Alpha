@@ -27,7 +27,7 @@ public class TextMeshCreator {
 		Line currentLine = new Line(metaData.getSpaceWidth(), text.getFontSize(), text.getMaxLineSize());
 		Word currentWord = new Word(text.getFontSize());
 		for (char c : chars) {
-			int ascii = (int) c;
+			int ascii = c;
 			if (ascii == SPACE_ASCII) {
 				boolean added = currentLine.attemptToAddWord(currentWord);
 				if (!added) {
@@ -80,7 +80,7 @@ public class TextMeshCreator {
 		return new TextMeshData(listToArray(vertices), listToArray(textureCoords));
 	}
 
-	private void addVerticesForCharacter(double curserX, double curserY, Character character, double fontSize,
+	private static void addVerticesForCharacter(double curserX, double curserY, Character character, double fontSize,
 			List<Float> vertices) {
 		double x = curserX + (character.getxOffset() * fontSize);
 		double y = curserY + (character.getyOffset() * fontSize);

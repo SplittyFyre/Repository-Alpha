@@ -93,7 +93,7 @@ public class TerrainRenderSystem {
 
 	private void loadModelMatrix(Terrain terrain) {
 		Matrix4f transformationMatrix = SFMath.createTransformationMatrix(
-				new Vector3f(terrain.getX(), 0, terrain.getZ()), 0, 0, 0, 1);
+				new Vector3f(terrain.getX(), terrain.getY(), terrain.getZ()), 0, 0, 0, 1);
 		shader.loadTransformationMatrix(transformationMatrix);
 	}
 	
@@ -101,6 +101,6 @@ public class TerrainRenderSystem {
 		shader.start();
 		shader.loadProjectionMatrix(matrix);
 		shader.stop();
-	}
+	}	
 	
 }

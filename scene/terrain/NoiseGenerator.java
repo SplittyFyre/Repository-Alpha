@@ -14,9 +14,9 @@ public class NoiseGenerator {
 	}
 	
 	public float generateHeight(int x, int z) {
-		/*if ((x == 0 || x == 127) || (z == 0 || z == 127)) {
-			return 20;
-		}*/
+		if ((x == 0 || x == 127) || (z == 0 || z == 127)) {
+			return 0;
+		}
 		float total = getInterpolatedNoise(x / 8f, z / 8f ) * AMPLITUDE;
 		total += getInterpolatedNoise(x / 4f, z / 4f ) * AMPLITUDE / 3;
 		total += getInterpolatedNoise(x / 2f, z / 2f ) * AMPLITUDE / 9;

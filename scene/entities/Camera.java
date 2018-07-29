@@ -9,8 +9,8 @@ public class Camera {
 	
 	private static final float FOV = 70;
 	private static final float NEAR_PLANE = 1f;
-	private static final float FAR_PLANE = 5000;
-	private static final float FARTHER_PLANE = 10000;
+	private static final float FAR_PLANE = 20000;
+	private static final float FARTHER_PLANE = 30000;
 	
 	private float distanceFrom = 50;
 	private float angleAround = 0;
@@ -18,7 +18,7 @@ public class Camera {
 	private float yaw;
 	private float roll;
 	
-	private Vector3f position = new Vector3f(100, 35, 50);
+	private Vector3f position = new Vector3f(0, 0, 0);
 	private Entity player;
 	
 	public Camera(Entity player) {
@@ -30,14 +30,13 @@ public class Camera {
 	}
 	
 	public void move() {
-		calculateAngleAround();
-		calculatePitch();
+		calculateMovement();
 		calculateZoom();
 		float horizDistance = calculateHorizDistance();
 		float verticDistance = calculateVerticDistance();
 		calculateCameraPos(horizDistance, verticDistance);
 		this.yaw = 180 - (player.getRotY() + angleAround);
-		
+		this.yaw %= 360;
 	}
 
 	public Vector3f getPosition() {
@@ -89,21 +88,14 @@ public class Camera {
 	}
 	
 	private void calculateZoom() {
-		float zoomLevel = Mouse.getDWheel() * 0.1f;
+		float zoomLevel = Mouse.getDWheel() * 0.5f;
 		distanceFrom -= zoomLevel;
 	}
 	
-	private void calculatePitch() {
-		if (Mouse.isButtonDown(1)) {
-			float pitchChange = Mouse.getDY() * 0.1f;
-			pitch -= pitchChange;
-		}
-	}
-	
-	private void calculateAngleAround() {
-		if (Mouse.isButtonDown(0)) {
-			float angleChange = Mouse.getDX() * 0.3f;
-			angleAround -= angleChange;
+	private void calculateMovement() {
+		if (Mouse.isButtonDown(2)) {
+			pitch -= Mouse.getDY() * 0.1f;
+			angleAround -= Mouse.getDX() * 0.3f;
 		}
 	}
 	

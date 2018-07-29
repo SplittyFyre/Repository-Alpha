@@ -98,6 +98,7 @@ public abstract class ShaderProgram {
 	private static int loadShader(String file, int type) {
 		StringBuilder shaderSource = new StringBuilder();
 		try{
+			@SuppressWarnings("resource")
 			BufferedReader reader = new BufferedReader(new FileReader(file));
 			String line;
 			while((line = reader.readLine()) != null) {
@@ -114,8 +115,9 @@ public abstract class ShaderProgram {
 		GL20.glCompileShader(shaderID);
 		
 		if (GL20.glGetShaderi(shaderID, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE) {
+			System.out.println();
+			System.err.println("Shader compilation error at : " + file + "	Details:");
 			System.out.println(GL20.glGetShaderInfoLog(shaderID, 500));
-			System.err.println("Shader compilation error at :" + file);
 			System.exit(-1);
 		}
 		return shaderID;

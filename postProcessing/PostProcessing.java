@@ -27,8 +27,8 @@ public class PostProcessing {
 	private static BrightFilter brightFilter;
 	private static CombineFilter combiner;
 
-	public static void init(Loader loader) {
-		quad = loader.loadToVAO(POSITIONS, 2);
+	public static void init() {
+		quad = Loader.loadToVAO(POSITIONS, 2);
 		contrastMod = new ContrastModification();
 		hBlur = new HorizontalBlur(Display.getWidth() / 2, Display.getHeight() / 2);
 		vBlur = new VerticalBlur(Display.getWidth() / 2, Display.getHeight() / 2);
@@ -37,7 +37,7 @@ public class PostProcessing {
 		//hBlur3 = new HorizontalBlur(Display.getWidth() / 32, Display.getHeight() / 32);
 		//vBlur3 = new VerticalBlur(Display.getWidth() / 32, Display.getHeight() / 32);
 		brightFilter = new BrightFilter(Display.getWidth() / 2, Display.getHeight() / 2);
-		combiner = new CombineFilter();
+		combiner = new CombineFilter(Display.getWidth(), Display.getHeight());
 	}
 	
 	public static void doPostProcessing(int colourTexture, int brightTexture) {
@@ -49,6 +49,7 @@ public class PostProcessing {
 		//hBlur3.render(vBlur2.getOutputTexture());
 		//vBlur3.render(hBlur3.getOutputTexture());
 		combiner.render(colourTexture, vBlur2.getOutputTexture());
+		contrastMod.render(combiner.getOutputTexture());
 		end();
 	}
 	
@@ -66,6 +67,7 @@ public class PostProcessing {
 		GL30.glBindVertexArray(quad.getVaoID());
 		GL20.glEnableVertexAttribArray(0);
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
+		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 	}
 	
 	private static void end() {

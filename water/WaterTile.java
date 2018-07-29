@@ -1,18 +1,32 @@
 package water;
 
-/**@broken**/
-
 public class WaterTile {
 	
-	public static final float TILE_SIZE = 2400;
+	public float size;
 	
 	private float height;
+	private float counter = 0;
 	private float x,z;
 	
-	public WaterTile(float centerX, float centerZ, float height){
+	public WaterTile(float centerX, float centerZ, float height, float size)   {
 		this.x = centerX;
 		this.z = centerZ;
 		this.height = height;
+		this.size = size;
+	}
+	
+	public void update() {
+		/*if (counter <= 1000) {
+			height += 0.005f;
+			counter++;
+		}
+		else if (counter <= 2000) {
+			height -= 0.005f;
+			counter++;
+		}
+		else {
+			counter = 0;
+		}*/
 	}
 
 	public float getHeight() {

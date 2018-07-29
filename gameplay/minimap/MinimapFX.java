@@ -18,10 +18,9 @@ public class MinimapFX {
 	private RawModel quad;
 	
 	public MinimapFX() {
-		Loader loader = new Loader();
 		imgrenderer = new ImageRenderer(Display.getWidth(), Display.getHeight());
 		shader = new MinimapShader();
-		quad = loader.loadToVAO(POSITIONS, 2);
+		quad = Loader.loadToVAO(POSITIONS, 2);
 	}
 	
 	public void processMinimap(int texture) {
@@ -40,7 +39,7 @@ public class MinimapFX {
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 	}
 	
-	private void end() {
+	private static void end() {
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		GL20.glDisableVertexAttribArray(0);
 		GL30.glBindVertexArray(0);

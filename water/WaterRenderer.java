@@ -16,7 +16,6 @@ import scene.entities.Camera;
 import scene.entities.Light;
 import utils.SFMath;
 
-/**@broken**/
 
 public class WaterRenderer {
 	
@@ -33,24 +32,25 @@ public class WaterRenderer {
 	private int dudvTexture;
 	private int normalMap;
 
-	public WaterRenderer(Loader loader, WaterShader shader, Matrix4f projectionMatrix, WaterFrameBuffers fbos) {
+	public WaterRenderer(WaterShader shader, Matrix4f projectionMatrix, WaterFrameBuffers fbos) {
 		this.shader = shader;
 		this.fbos = fbos;
-		dudvTexture = loader.loadTexture(DUDV_MAP);
-		normalMap = loader.loadTexture(NORMAL_MAP);
+		dudvTexture = Loader.loadTexture(DUDV_MAP);
+		normalMap = Loader.loadTexture(NORMAL_MAP);
 		shader.start();
 		shader.connectTextureUnits();
 		shader.loadProjectionMatrix(projectionMatrix);
 		shader.stop();
-		setUpVAO(loader);
+		setUpVAO();
 	}
 
 	public void render(List<WaterTile> water, Camera camera, Light sun) {
 		prepareRender(camera, sun);	
 		for (WaterTile tile : water) {
+			tile.update();
 			Matrix4f modelMatrix = SFMath.createTransformationMatrix(
 					new Vector3f(tile.getX(), tile.getHeight(), tile.getZ()), 0, 0, 0,
-					WaterTile.TILE_SIZE);
+					tile.size);
 			shader.loadModelMatrix(modelMatrix);
 			GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, quad.getVertexCount());
 		}
@@ -87,10 +87,10 @@ public class WaterRenderer {
 		shader.stop();
 	}
 
-	private void setUpVAO(Loader loader) {
+	private void setUpVAO() {
 		// Just x and z vectex positions here, y is set to 0 in v.shader
 		float[] vertices = { -1, -1, -1, 1, 1, -1, 1, -1, -1, 1, 1, 1 };
-		quad = loader.loadToVAO(vertices, 2);
+		quad = Loader.loadToVAO(vertices, 2);
 	}
 
 }

@@ -12,6 +12,7 @@ public abstract class Projectile extends Entity {
 	protected float damage;
 	
 	public abstract float getDamage();
+	public abstract void update();
 	
 	public Projectile(TexturedModel model, Vector3f position, float rotX, float rotY, float rotZ, float scale, float damage) {
 		super(model, position, rotX, rotY, rotZ, scale);
@@ -37,6 +38,10 @@ public abstract class Projectile extends Entity {
 	
 	protected void setDead() {
 		this.isDead = true;
+	}
+
+	public boolean isDead() {
+		return isDead;
 	}
 
 }

@@ -20,6 +20,10 @@ uniform vec3 skyColour;
 
 uniform float brightDamper;
 
+uniform vec4 highlight;
+
+//const float cellvl = 1;
+
 void main(void){
 
 	vec3 unitNormal = normalize(surfaceNormal);
@@ -35,11 +39,18 @@ void main(void){
 		vec3 unitLightVector = normalize(toLightVector[i]);
 		float nDotl = dot(unitNormal,unitLightVector);
 		float brightness = max(nDotl,0.1);
+		
+		/*float level = floor(brightness * cellvl);
+		brightness = level / cellvl;*/
+		
 		vec3 lightDirection = -unitLightVector;
 		vec3 reflectedLightDirection = reflect(lightDirection,unitNormal);
 		float specularFactor = dot(reflectedLightDirection , unitVectorToCamera);
 		specularFactor = max(specularFactor,0.0);
 		float dampedFactor = pow(specularFactor,shineDamper);
+		
+		/*level = floor(dampedFactor * cellvl);
+		dampedFactor = level / cellvl;*/
 		
 		totalDiffuse = totalDiffuse + (brightness * lightColour[i]) / attFactor;
 		totalSpecular = totalSpecular + (dampedFactor * reflectivity * lightColour[i]) / attFactor;
@@ -67,5 +78,6 @@ void main(void){
 
 	out_Color = vec4(totalDiffuse,1.0) * textureColour + vec4(totalSpecular,1.0);
 	out_Color = mix(vec4(skyColour,1.0),out_Color, visibility);
+	out_Color += highlight;
 	out_BrightColor /= brightDamper;
 }

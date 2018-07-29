@@ -1,4 +1,4 @@
-package renderEngine.guis.buttons;
+package renderEngine.guis;
 
 import java.util.List;
 
@@ -11,10 +11,10 @@ public interface IButton {
 	void onStartHover(IButton button);
 	void onStopHover(IButton button);
 	void whileHovering(IButton button);
-	void show(List<GUITexture> textures);
-	void hide(List<GUITexture> textures);
+	void buttonShow(List<GUITexture> textures);
+	void buttonHide(List<GUITexture> textures);
 	void playHoverAnimation(float scaleIncrease);
 	void resetScale();
-	void update();
+	void buttonUpdate();
 	
 }

@@ -1,6 +1,7 @@
 package scene.entities;
 
 import org.lwjgl.util.vector.Vector3f;
+import org.lwjgl.util.vector.Vector4f;
 
 import collision.BoundingBox;
 import renderEngine.models.TexturedModel;
@@ -14,6 +15,19 @@ public abstract class Entity {
 	private BoundingBox boundingBox;
 	private final BoundingBox staticBoundingBox;
 	
+	public boolean customRotationAxis = false;
+	public Vector3f customOrigin = null;
+	
+	public Vector4f highlight = null;
+	
+	public Vector4f getHighlight() {
+		return highlight;
+	}
+
+	public void setHighlight(Vector4f highlight) {
+		this.highlight = highlight;
+	}
+
 	private int textureIndex = 0;
 	
 	public abstract void respondToCollision();
@@ -44,7 +58,7 @@ public abstract class Entity {
 		this.boundingBox = new BoundingBox(this.getModel().getRawModel().getBoundingBox());
 		this.staticBoundingBox = new BoundingBox(boundingBox);
 	}
-	
+
 	public float getTextureXOffset() {
 		int column = textureIndex % model.getTexture().getNumRows();
 		

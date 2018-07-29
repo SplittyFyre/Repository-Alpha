@@ -17,27 +17,34 @@ import utils.SFMath;
 
 public class Terrain {
 	
-	private static final float SIZE = 4800;
 	private static final float MAX_PIXEL_COLOUR = 256 * 256 * 256;
 	
 	private float x;
+	private float y;
 	private float z;
 	private RawModel model;
 	private TerrainTexturePack texturePack;
 	private TerrainTexture blendMap;
+	private float size;
 	
 	float[][] heights;
 	
-	public Terrain(int gridX, int gridZ, Loader loader, TerrainTexturePack texturePack, TerrainTexture blendMap, String heightMap){
+	public Terrain(float x, float y, float z, float size, TerrainTexturePack texturePack, TerrainTexture blendMap, String heightMap) {
+		this.size = size;
 		this.texturePack = texturePack;
 		this.blendMap = blendMap;
-		this.x = gridX * SIZE;
-		this.z = gridZ * SIZE;
-		this.model = generateTerrain(loader, heightMap);
+		this.x = x - (size / 2);
+		this.y = y;
+		this.z = z - (size / 2);
+		this.model = generateTerrain(heightMap);
 	}
 	
 	public float getX() {
 		return x;
+	}
+	
+	public float getY() {
+		return y;
 	}
 
 	public float getZ() {
@@ -60,7 +67,7 @@ public class Terrain {
 		
 		float terrainX = worldX - this.x;
 		float terrainZ = worldZ - this.z;
-		float gridSize = SIZE / ((float) heights.length - 1);
+		float gridSize = size / ((float) heights.length - 1);
 		int gridX = (int) Math.floor(terrainX / gridSize);
 		int gridZ = (int) Math.floor(terrainZ / gridSize);
 		
@@ -86,7 +93,7 @@ public class Terrain {
 		return answer;
 	}
 	
-	private RawModel generateTerrain(Loader loader, String heightMap) {
+	private RawModel generateTerrain(String heightMap) {
 		
 		NoiseGenerator generator = new NoiseGenerator();
 		
@@ -113,11 +120,11 @@ public class Terrain {
 			
 			for(int j = 0; j < VERTEX_COUNT; j++) {
 				
-				vertices[vertexPointer * 3] = j / ((float) VERTEX_COUNT - 1) * SIZE;
+				vertices[vertexPointer * 3] = j / ((float) VERTEX_COUNT - 1) * this.size;
 				float height = getHeight(j, i, generator);
 				heights[j][i] = height;
 				vertices[vertexPointer * 3 + 1] = height;
-				vertices[vertexPointer * 3 + 2] = i / ((float) VERTEX_COUNT - 1) * SIZE;
+				vertices[vertexPointer * 3 + 2] = i / ((float) VERTEX_COUNT - 1) * this.size;
 				Vector3f normal = calculateNormal(j, i, generator);
 				normals[vertexPointer * 3] = normal.x;
 				normals[vertexPointer * 3 + 1] = normal.y;
@@ -145,7 +152,7 @@ public class Terrain {
 				indices[pointer++] = bottomRight;
 			}
 		}
-		return loader.loadToVAO(vertices, textureCoords, normals, indices, null);
+		return Loader.loadToVAO(vertices, textureCoords, normals, indices, null);
 	}
 	
 	private Vector3f calculateNormal(int x, int z, NoiseGenerator generator) {

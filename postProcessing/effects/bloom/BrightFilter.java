@@ -10,7 +10,7 @@ public class BrightFilter {
 	private ImageRenderer renderer;
 	private BrightFilterShader shader;
 	
-	public BrightFilter(int width, int height){
+	public BrightFilter(int width, int height) {
 		shader = new BrightFilterShader();
 		renderer = new ImageRenderer(width, height);
 	}

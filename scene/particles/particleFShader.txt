@@ -1,6 +1,7 @@
 #version 400 core
 
-out vec4 out_colour;
+layout (location = 0) out vec4 out_Color;
+layout (location = 1) out vec4 out_BrightColor;
 
 in vec2 textureCoords1;
 in vec2 textureCoords2;
@@ -13,6 +14,8 @@ void main(void){
 	vec4 colour1 = texture(particleTexture, textureCoords1);
 	vec4 colour2 = texture(particleTexture, textureCoords2);
 	
-	out_colour = mix(colour1, colour2, blend);
+	out_Color = mix(colour1, colour2, blend);
+	
+	out_BrightColor = out_Color / 2;
 
 }

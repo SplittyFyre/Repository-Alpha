@@ -16,7 +16,7 @@ import renderEngine.models.RawModel;
 
 public class OBJParser {
 
-	public static RawModel loadObjModel(String fileName, Loader loader) {
+	public static RawModel loadObjModel(String fileName) {
 		
 		FileReader fr = null;
 		
@@ -128,7 +128,7 @@ public class OBJParser {
 			
 		}
 		
-		return loader.loadToVAO(verticesArray, textureArray, normalsArray, indicesArray, aabb);
+		return Loader.loadToVAO(verticesArray, textureArray, normalsArray, indicesArray, aabb);
 		
 	}
 

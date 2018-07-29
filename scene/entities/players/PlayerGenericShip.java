@@ -15,6 +15,9 @@ import scene.entities.projectiles.Torpedo;
 import scene.particles.ParticleSystem;
 import utils.RaysCast;
 
+/**@deprecated
+ * Unused class**/
+@Deprecated
 public class PlayerGenericShip extends Entity {
 	
 	private List<Torpedo> torpedoes = new ArrayList<Torpedo>();

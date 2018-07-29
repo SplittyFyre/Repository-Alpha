@@ -14,10 +14,20 @@ public class Particle {
 	private float rotation;
 	private float scale;
 	
+	public void setLife(float f) {
+		this.lifeLength = f;
+	}
+	
+	public boolean priority = false;
+	
 	private ParticleTexture texture;
 	
 	private Vector2f texOffSet1 = new Vector2f();
 	private Vector2f texOffSet2 = new Vector2f();
+	
+	private Vector3f trace = null;
+	private Vector3f ttlChange;
+	
 	private float blend;
 	
 	protected Vector2f getTexOffSet1() {
@@ -45,6 +55,33 @@ public class Particle {
 		this.texture = texture;
 		ParticleWatcher.addParticle(this);
 	}
+	
+	public Particle(ParticleTexture texture, Vector3f position, Vector3f velocity, float gravityEffect, float lifeLength, float rotation,
+			float scale, boolean prir) {
+		this.position = position;
+		this.velocity = velocity;
+		this.gravityEffect = gravityEffect;
+		this.lifeLength = lifeLength;
+		this.rotation = rotation;
+		this.scale = scale;
+		this.texture = texture;
+		this.priority = prir;
+		ParticleWatcher.addParticle(this);
+	}
+	
+	public Particle(ParticleTexture texture, Vector3f position, Vector3f velocity, float gravityEffect, float lifeLength, float rotation,
+			float scale, Vector3f trace) {
+		this.position = position;
+		this.velocity = velocity;
+		this.gravityEffect = gravityEffect;
+		this.lifeLength = lifeLength;
+		this.rotation = rotation;
+		this.scale = scale;
+		this.texture = texture;
+		this.trace = trace;
+		this.ttlChange = new Vector3f(0, 0, 0);
+		ParticleWatcher.addParticle(this);
+	}
 
 	protected ParticleTexture getTexture() {
 		return texture;
@@ -65,7 +102,15 @@ public class Particle {
 	protected boolean update() {
 		Vector3f change = new Vector3f(velocity);
 		change.scale(DisplayManager.getFrameTime());
-		Vector3f.add(change, position, position);
+		
+		if (this.trace != null) {
+			Vector3f.add(change, ttlChange, ttlChange);
+			Vector3f.add(ttlChange, trace, position);
+		}
+		else {
+			Vector3f.add(change, position, position);
+		}
+		
 		updateTextureCoordsInfo();
 		elapsedTime += DisplayManager.getFrameTime();
 		

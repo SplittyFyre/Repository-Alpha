@@ -38,6 +38,7 @@ public class EntityShader extends ShaderProgram{
 	private int location_usesSpecularMap;
 	private int location_modelTexture;
 	private int location_brightDamper;
+	private int location_highlight;
 
 
 	public EntityShader() {
@@ -67,6 +68,7 @@ public class EntityShader extends ShaderProgram{
 		location_offset = super.getUniformLocation("offset");
 		location_plane = super.getUniformLocation("plane");
 		location_brightDamper = super.getUniformLocation("brightDamper");
+		location_highlight = super.getUniformLocation("highlight");
 		
 		location_lightColour = new int[MAX_LIGHTS];
 		location_lightPosition = new int[MAX_LIGHTS];
@@ -151,6 +153,10 @@ public class EntityShader extends ShaderProgram{
 	
 	public void loadSkyColour(float r, float g, float b) {
 		super.loadVector(location_skyColour, new Vector3f(r, g, b));
+	}
+	
+	public void loadHighlight(Vector4f colour) {
+		super.load4dVector(location_highlight, colour != null ? colour : new Vector4f(0, 0, 0, 0));
 	}
 
 }

@@ -7,7 +7,6 @@ import scene.entities.Camera;
 import scene.entities.Light;
 import utils.SFMath;
 
-/**@broken**/
 
 public class WaterShader extends ShaderProgram {
 

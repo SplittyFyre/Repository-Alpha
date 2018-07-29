@@ -8,6 +8,7 @@ import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.util.vector.Matrix4f;
+import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
 import renderEngine.MasterRenderSystem;
@@ -93,10 +94,41 @@ public class EntityRenderSystem {
 	}
 
 	private void prepareInstance(Entity entity) {
-		Matrix4f transformationMatrix = SFMath.createTransformationMatrix(entity.getPosition(),
-				entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+		
+		Matrix4f transformationMatrix;
+		
+		if (entity.customRotationAxis && entity.customOrigin != null) {
+			transformationMatrix = SFMath.createTransformationMatrix(new Vector3f(entity.getPosition()), entity.customOrigin,
+					entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+		}
+		else {
+			transformationMatrix = SFMath.createTransformationMatrix(entity.getPosition(),
+					entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+		}
+		
 		shader.loadTransformationMatrix(transformationMatrix);
 		shader.loadOffset(entity.getTextureXOffset(), entity.getTextureYOffset());
+		shader.loadHighlight(entity.getHighlight());
+	
+		/*Vector4f mins = new Vector4f(entity.getStaticBoundingBox().minX, 
+									 entity.getStaticBoundingBox().minY,
+									 entity.getStaticBoundingBox().minZ, 1);
+		
+		Vector4f maxs = new Vector4f(entity.getStaticBoundingBox().maxX, 
+				 					 entity.getStaticBoundingBox().maxY,
+				 					 entity.getStaticBoundingBox().maxZ, 1);
+		
+		Matrix4f.transform(transformationMatrix, mins, mins);
+		Matrix4f.transform(transformationMatrix, maxs, maxs);
+		
+		entity.getBoundingBox().minX = mins.x;
+		entity.getBoundingBox().minY = mins.y;
+		entity.getBoundingBox().minZ = mins.z;
+		
+		entity.getBoundingBox().maxX = maxs.x;
+		entity.getBoundingBox().maxY = maxs.y;
+		entity.getBoundingBox().maxZ = maxs.z;*/
+		
 	}
 	
 	public void setProjectionMatrix(Matrix4f matrix) {

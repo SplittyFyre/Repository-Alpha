@@ -13,6 +13,8 @@ import fontRendering.TextMaster;
  */
 public class GUIText {
 
+	private boolean visible = true;
+	
 	private String textString;
 	private float fontSize;
 
@@ -66,7 +68,9 @@ public class GUIText {
 	
 	public void setText(String text) {
 		this.textString = text;
-		TextMaster.removeText(this);
+		if (visible) {
+			TextMaster.removeText(this);
+		}
 		TextMaster.addText(this);
 	}
 
@@ -75,6 +79,24 @@ public class GUIText {
 	 */
 	public void remove() {
 		TextMaster.removeText(this);
+	}
+	
+	public void show() {
+		if (!visible) {
+			TextMaster.addText(this);
+			visible = true;
+		}
+	}
+	
+	public void hide() {
+		if (visible) {
+			TextMaster.removeText(this);
+			visible = false;
+		}
+	}
+	
+	public boolean isVisible() {
+		return visible;
 	}
 
 	/**

@@ -12,7 +12,7 @@ import scene.entities.Camera;
 
 public class SkyboxRenderSystem {
 	
-	private static final float SIZE = 1000f;
+	private static final float SIZE = 10000f;
 	
 	private static final float[] VERTICES = {        
 		    -SIZE,  SIZE, -SIZE,
@@ -66,11 +66,11 @@ public class SkyboxRenderSystem {
 	private int nightTexture;
 	private SkyboxShader shader;
 		
-	public SkyboxRenderSystem(Loader loader, Matrix4f projMatrix) {
+	public SkyboxRenderSystem(Matrix4f projMatrix) {
 		
-		cube = loader.loadToVAO(VERTICES, 3);
-		texture = loader.loadCubeMap(TEXTURE_FILES);
-		nightTexture = loader.loadCubeMap(NIGHT_TEXTURE_FILES);
+		cube = Loader.loadToVAO(VERTICES, 3);
+		texture = Loader.loadCubeMap(TEXTURE_FILES);
+		nightTexture = Loader.loadCubeMap(NIGHT_TEXTURE_FILES);
 		shader = new SkyboxShader();
 		shader.start();
 		shader.connectTextureUnits();
