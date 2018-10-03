@@ -1,9 +1,12 @@
 package scene.entities;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
+
+import scene.entities.players.Player;
 
 public class Camera {
 	
@@ -21,8 +24,13 @@ public class Camera {
 	private Vector3f position = new Vector3f(0, 0, 0);
 	private Entity player;
 	
-	public Camera(Entity player) {
+	public Camera(Player player) {
 		this.player = player;
+		player.camera = this;
+	}
+	
+	public void setAngleAround(float angle) {
+		this.angleAround = angle;
 	}
 	
 	public void invertPitch() {
@@ -76,6 +84,7 @@ public class Camera {
 		position.z = player.getPosition().z - offsetZ;
 		position.y = player.getPosition().y + vertic + 3.0f;
 		
+		//Vector3f.add(getPosition(), SFMath.xTranslation, getPosition());
 		
 	}
 	
@@ -90,6 +99,14 @@ public class Camera {
 	private void calculateZoom() {
 		float zoomLevel = Mouse.getDWheel() * 0.5f;
 		distanceFrom -= zoomLevel;
+		
+		if (Keyboard.isKeyDown(Keyboard.KEY_MINUS)) {
+			distanceFrom += 5f;
+		}
+		else if (Keyboard.isKeyDown(Keyboard.KEY_EQUALS)) {
+			distanceFrom -= 5f;
+		}
+		
 	}
 	
 	private void calculateMovement() {

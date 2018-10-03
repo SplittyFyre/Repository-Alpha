@@ -1,9 +1,7 @@
 package objStuff;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,16 +16,9 @@ public class OBJParser {
 
 	public static RawModel loadObjModel(String fileName) {
 		
-		FileReader fr = null;
+		InputStreamReader isr = new InputStreamReader(Class.class.getResourceAsStream("/res/" + fileName + ".obj"));
 		
-		try {
-			fr = new FileReader(new File("res/" + fileName + ".obj"));
-		} catch (FileNotFoundException e) {
-			System.err.println("Couldn't load file!");
-			e.printStackTrace();
-		}
-		
-		BufferedReader reader = new BufferedReader(fr);
+		BufferedReader reader = new BufferedReader(isr);
 		String line;
 		List<Vector3f> vertices = new ArrayList<Vector3f>();
 		List<Vector2f> textures = new ArrayList<Vector2f>();

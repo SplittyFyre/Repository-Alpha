@@ -14,10 +14,21 @@ public class GUITexture implements IGUI {
 	private Vector2f position;
 	private Vector2f scale;
 	private float rotation;
+	private boolean flipped = false;
+	
+	public boolean flagAlpha = false;
+	public float custAlpha = 0;
 	
 	public GUITexture(int textureID, Vector2f position, Vector2f scale) {
 		this.textureID = textureID;
 		this.position = position;
+		this.scale = scale;
+		this.rotation = 0;
+	}
+	
+	public GUITexture(int textureID, Vector2f origin, Vector2f position, Vector2f scale) {
+		this.textureID = textureID;
+		this.position = Vector2f.add(origin, position, null);
 		this.scale = scale;
 		this.rotation = 0;
 	}
@@ -35,6 +46,14 @@ public class GUITexture implements IGUI {
 
 	public void setRotation(float rotation) {
 		this.rotation = rotation;
+	}
+	
+	public boolean isFlipped() {
+		return flipped;
+	}
+
+	public void setFlipped(boolean flag) {
+		this.flipped = flag;
 	}
 
 	public void setPosition(Vector2f position) {

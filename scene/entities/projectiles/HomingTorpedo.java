@@ -2,11 +2,13 @@ package scene.entities.projectiles;
 
 import org.lwjgl.util.vector.Vector3f;
 
-import box.TaskManager;
+import box.TM;
 import renderEngine.DisplayManager;
 import renderEngine.models.TexturedModel;
 import scene.entities.Entity;
+import scene.entities.players.Player;
 import scene.particles.Particle;
+import scene.particles.ParticleSystem;
 import scene.particles.ParticleTexture;
 import utils.SFMath;
 
@@ -25,6 +27,10 @@ public class HomingTorpedo extends Projectile {
 	
 	private float particleLife, particleScale;
 	
+	private Runnable col = null;
+	
+	private ParticleSystem sys = null;
+	
 	public HomingTorpedo(TexturedModel model, Vector3f position, float scaleX, float scaleY, float scaleZ,
 			float damage, float speed, float lifelength, Entity target, float arcX, float arcY, float arcZ) {
 		super(model, position, 0, 0, 0, scaleX, scaleY, scaleZ, damage, 0, 0, 0);
@@ -34,6 +40,18 @@ public class HomingTorpedo extends Projectile {
 		this.arcX = arcX;
 		this.arcY = arcY;
 		this.arcZ = arcZ;
+	}
+	
+	public HomingTorpedo(TexturedModel model, Vector3f position, float scaleX, float scaleY, float scaleZ,
+			float damage, float speed, float lifelength, Entity target, float arcX, float arcY, float arcZ, ParticleSystem sysin) {
+		super(model, position, 0, 0, 0, scaleX, scaleY, scaleZ, damage, 0, 0, 0);
+		this.speed = speed;
+		this.target = target;
+		this.lifelength = lifelength;
+		this.arcX = arcX;
+		this.arcY = arcY;
+		this.arcZ = arcZ;
+		sys = sysin;
 	}
 	
 	public HomingTorpedo(TexturedModel model, Vector3f position, float scaleX, float scaleY, float scaleZ,
@@ -54,6 +72,25 @@ public class HomingTorpedo extends Projectile {
 		this.particleScale = particleScale;
 	}
 	
+	public HomingTorpedo(TexturedModel model, Vector3f position, float scaleX, float scaleY, float scaleZ,
+			float damage, float speed, float lifelength, Entity target, float arcX, float arcY, float arcZ, 
+			ParticleTexture trailTexture, float particleLife, float particleScale, Runnable col) {
+		super(model, position, 0, 0, 0, scaleX, scaleY, scaleZ, damage, 0, 0, 0);
+		this.speed = speed;
+		this.target = target;
+		this.lifelength = lifelength;
+		this.arcX = arcX;
+		this.arcY = arcY;
+		this.arcZ = arcZ;
+		
+		this.trail = true;
+		
+		this.trailTexture = trailTexture;
+		this.particleLife = particleLife;
+		this.particleScale = particleScale;
+		this.col = col;
+	}
+	
 	@Override
 	public void update() {
 		
@@ -62,14 +99,20 @@ public class HomingTorpedo extends Projectile {
 		}
 		timer += DisplayManager.getFrameTime();
 		float dtmove = DisplayManager.getFrameTime() * this.speed;
-		if (target != null)
-			tracing = SFMath.rotateToFaceVector(this.getPosition(), target.getPosition());
+		if (target != null) {
+			if (target instanceof Player)
+				tracing = SFMath.rotateToFaceVector(this.getPosition(), ((Player) target).getPlayerPos());	
+			else
+				tracing = SFMath.rotateToFaceVector(this.getPosition(), target.getPosition());
+		}
 		else
 			tracing = new Vector3f(0, 0, 0);
 		
-		float homingX = (float) (dtmove * Math.sin(Math.toRadians(tracing.y + arcX)));
+		//float arch = (float) Math.toRadians(tracing.x + arcY));
+		
+		float homingX = (float) (dtmove * Math.sin(Math.toRadians(tracing.y + arcX)) * Math.cos(Math.toRadians(tracing.x + arcY)));
 		float homingY = (float) (dtmove * Math.sin(Math.toRadians(tracing.x + arcY)));
-		float homingZ = (float) (dtmove * Math.cos(Math.toRadians(tracing.y + arcZ)));
+		float homingZ = (float) (dtmove * Math.cos(Math.toRadians(tracing.y + arcZ)) * Math.cos(Math.toRadians(tracing.x + arcY)));
 		
 		super.move(homingX, homingY, homingZ);
 		
@@ -100,7 +143,15 @@ public class HomingTorpedo extends Projectile {
 	@Override
 	public void respondToCollision() {
 		this.setDead();
-		TaskManager.explosionParticleSystem.generateParticles(this.getPosition());
+		if (sys != null)
+			sys.generateParticles(getPosition());
+		else
+			TM.explosionParticleSystem.generateParticles(this.getPosition());
+		
+		if (this.col != null) {
+			col.run();
+		}
+		
 	}
 
 }

@@ -10,6 +10,7 @@ import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
+import renderEngine.MasterRenderSystem;
 import renderEngine.models.RawModel;
 import renderEngine.textures.TerrainTexturePack;
 import scene.entities.Camera;
@@ -38,9 +39,16 @@ public class TerrainRenderSystem {
 		for (Terrain terrain : terrains) {
 			prepareTerrain(terrain);
 			loadModelMatrix(terrain);
+			shader.loadBase(terrain.base);
+			shader.loadHeight(terrain.getY());
+			if (terrain.base) {
+				MasterRenderSystem.enableFaceCulling();
+				GL11.glCullFace(GL11.GL_FRONT);
+			}
 			GL11.glDrawElements(GL11.GL_TRIANGLES, terrain.getModel().getVertexCount(),
 					GL11.GL_UNSIGNED_INT, 0);
 			unbindTexturedModel();
+			MasterRenderSystem.disableFaceCulling();
 		}
 		shader.stop();
 	}

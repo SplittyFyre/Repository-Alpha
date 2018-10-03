@@ -1,9 +1,11 @@
- package scene.entities.players;
+package scene.entities.players;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Callable;
 
+import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector2f;
@@ -11,7 +13,8 @@ import org.lwjgl.util.vector.Vector3f;
 
 import audio.AudioEngine;
 import audio.AudioSrc;
-import box.TaskManager;
+import box.Main;
+import box.TM;
 import collision.BoundingBox;
 import fontMeshCreator.GUIText;
 import objStuff.OBJParser;
@@ -27,7 +30,7 @@ import renderEngine.models.TexturedModel;
 import renderEngine.textures.GUITexture;
 import renderEngine.textures.ModelTexture;
 import scene.entities.Entity;
-import scene.entities.hostiles.BorgVessel;
+import scene.entities.entityUtils.StatusText;
 import scene.entities.hostiles.Enemy;
 import scene.entities.projectiles.Bolt;
 import scene.entities.projectiles.HomingTorpedo;
@@ -40,17 +43,31 @@ import utils.SFMath;
 
 public class PlayerWarshipVoyager extends Player {
 	
+	private Vector2f panelpos = new Vector2f(0.65f, -0.3f);
+	private Vector2f schmpos = Vector2f.add(panelpos, new Vector2f(-0.2455f, 0), null);
+	//schmpos = [0.4045, -0.3f]
+	
+	private GUITexture gui_panel = new GUITexture(Loader.loadTexture("LCARSpanel"), panelpos, new Vector2f(0.35f, 0.7f));;
+	private GUITexture schematic = new GUITexture(Loader.loadTexture("schematic1"), schmpos, new Vector2f(0.233f, 0.466f));;
+	
 	private List<IGUI> tacticalElements = new ArrayList<IGUI>();
 	private List<IGUI> opsElements = new ArrayList<IGUI>();
 	private List<IGUI> helmElements = new ArrayList<IGUI>();
 	
 	private List<IGUI> miscElements = new ArrayList<IGUI>();
 	
+	private static final String tag = "HMCS Voyager";
+	private GUIText trmText = new GUIText(tag, 1, TM.font, new Vector2f(0.75f, 0.3f), 0.25f, true);
+	
+	private boolean shieldWarning = false;
+	
 	private SFAbstractButton viewScreenViewAft;
 	//private SFAbstractButton viewScreenViewMap;
 
+	private int a1 = Loader.loadTexture("voyphaserdiag2");
+	private int b1 = Loader.loadTexture("voyphaserdiagactive");
 	//BOOKMARK front phaser shoot button 
-	private SFAbstractButton phaserbutton = new SFAbstractButton(tacticalElements, "phaserbutton", new Vector2f(0.4f, 0.1f), new Vector2f(0.04f / 1.68f, 0.04f)) {
+	private SFAbstractButton phaserbutton = new SFAbstractButton(tacticalElements, "voyphaserdiag2", schematic.getPosition(), new Vector2f(-0.0045f, 0.375f), TM.sqr8) {
 		
 		@Override
 		public void whileHovering(IButton button) {
@@ -59,12 +76,12 @@ public class PlayerWarshipVoyager extends Player {
 		
 		@Override
 		public void onStopHover(IButton button) {
-			
+			this.getTexture().setTexture(a1);
 		}
 		
 		@Override
 		public void onStartHover(IButton button) {
-			
+			this.getTexture().setTexture(b1);
 		}
 		
 		@Override
@@ -78,8 +95,10 @@ public class PlayerWarshipVoyager extends Player {
 		}
 	};
 	
+	private int a2 = Loader.loadTexture("guisys");
+	private int b2 = Loader.loadTexture("guisysfilled");
 	//BOOKMARK front double photon shots
-	private SFAbstractButton frontphotonbutton = new SFAbstractButton(tacticalElements, "photonbutton", new Vector2f(0.35f, -0.05f), new Vector2f(0.04f / 1.68f, 0.04f)) {
+	private SFAbstractButton frontphotonbutton = new SFAbstractButton(tacticalElements, "guisys", schmpos, new Vector2f(-0.0545f, 0.25f), TM.sqr8) {
 		
 		@Override
 		public void whileHovering(IButton button) {
@@ -95,13 +114,13 @@ public class PlayerWarshipVoyager extends Player {
 		
 		@Override
 		public void onStopHover(IButton button) {
-			// TODO Auto-generated method stub
+			this.getTexture().setTexture(a2);
 			
 		}
 		
 		@Override
 		public void onStartHover(IButton button) {
-			// TODO Auto-generated method stub
+			this.getTexture().setTexture(b2);
 			
 		}
 		
@@ -112,7 +131,7 @@ public class PlayerWarshipVoyager extends Player {
 	};
 	
 	//BOOKMARK front double quantum shots
-	private SFAbstractButton frontquantumbutton = new SFAbstractButton(tacticalElements, "quantumbutton", new Vector2f(0.45f, -0.05f), new Vector2f(0.04f / 1.68f, 0.04f)) {
+	private SFAbstractButton frontquantumbutton = new SFAbstractButton(tacticalElements, "guisys", schmpos, new Vector2f(0.0455f, 0.25f), TM.sqr8) {
 		
 		@Override
 		public void whileHovering(IButton button) {
@@ -128,13 +147,13 @@ public class PlayerWarshipVoyager extends Player {
 		
 		@Override
 		public void onStopHover(IButton button) {
-			// TODO Auto-generated method stub
+			this.getTexture().setTexture(a2);
 			
 		}
 		
 		@Override
 		public void onStartHover(IButton button) {
-			// TODO Auto-generated method stub
+			this.getTexture().setTexture(b2);
 			
 		}
 		
@@ -144,8 +163,346 @@ public class PlayerWarshipVoyager extends Player {
 		}
 	};
 	
+	private int a3 = Loader.loadTexture("subsec");
+	private int b3 = Loader.loadTexture("subsecfilled");
+	//BOOKMARK phaser spray
+	private SFAbstractButton spraybutton = new SFAbstractButton(tacticalElements, "subsec", schmpos, new Vector2f(-0.0045f, 0.175f), TM.sqr4) {
+		
+		@Override
+		public void whileHovering(IButton button) {
+			
+		}
+		
+		@Override
+		public void whileHolding(IButton button) {
+			firePhaserSpray();
+		}
+		
+		@Override
+		public void onStopHover(IButton button) {
+			this.getTexture().setTexture(a3);
+		}
+		
+		@Override
+		public void onStartHover(IButton button) {
+			this.getTexture().setTexture(b3);
+		}
+		
+		@Override
+		public void onClick(IButton button) {
+			
+		}
+	};
+	
+	private int a4 = Loader.loadTexture("sqgui");
+	private int b4 = Loader.loadTexture("sqguifilled");
+	private Vector2f varl = new Vector2f(0.03f / TM.GUI_SCALE_DIV, 0.02f);
+	//BOOKMARK shoot port arrays
+	private SFAbstractButton portarray1 = new SFAbstractButton(tacticalElements, "sqgui", schmpos, new Vector2f(-0.055f, 0.15f), varl) {
+		
+		@Override
+		public void whileHovering(IButton button) {
+			
+		}
+		
+		@Override
+		public void whileHolding(IButton button) {
+			firePortArrays(true);
+		}
+		
+		@Override
+		public void onStopHover(IButton button) {
+			this.getTexture().setTexture(a4);
+		}
+		
+		@Override
+		public void onStartHover(IButton button) {
+			this.getTexture().setTexture(b4);
+		}
+		
+		@Override
+		public void onClick(IButton button) {
+			
+		}
+	};
+	
+	private SFAbstractButton portarray2 = new SFAbstractButton(tacticalElements, "sqgui", schmpos, new Vector2f(-0.055f, 0.1f), varl) {
+		
+		@Override
+		public void whileHovering(IButton button) {
+			
+		}
+		
+		@Override
+		public void whileHolding(IButton button) {
+			firePortArrays(false); 
+		}
+		
+		@Override
+		public void onStopHover(IButton button) {
+			this.getTexture().setTexture(a4);
+		}
+		
+		@Override
+		public void onStartHover(IButton button) {
+			this.getTexture().setTexture(b4);
+		}
+		
+		@Override
+		public void onClick(IButton button) {
+			
+		}
+	};
+	
+	private SFAbstractButton portdorsalbuttonvar = new SFAbstractButton(tacticalElements, "sqgui", schmpos, new Vector2f(-0.055f, 0.05f), varl) {
+		
+		@Override
+		public void whileHovering(IButton button) {
+			
+		}
+		
+		@Override
+		public void whileHolding(IButton button) {
+			fireDorsalPortArrays(portslider.getSliderValue() * 22.5f); 
+		}
+		
+		@Override
+		public void onStopHover(IButton button) {
+			this.getTexture().setTexture(a4);
+		}
+		
+		@Override
+		public void onStartHover(IButton button) {
+			this.getTexture().setTexture(b4);
+		}
+		
+		@Override
+		public void onClick(IButton button) {
+			
+		}
+	};
+	
+	//BOOKMARK fire starboard arrays
+	private SFAbstractButton stararray1 = new SFAbstractButton(tacticalElements, "sqgui", schmpos, new Vector2f(0.0455f, 0.15f), varl) {
+		
+		@Override
+		public void whileHovering(IButton button) {
+			
+		}
+		
+		@Override
+		public void whileHolding(IButton button) {
+			fireStarbArrays(true);
+		}
+		
+		@Override
+		public void onStopHover(IButton button) {
+			this.getTexture().setTexture(a4);
+		}
+		
+		@Override
+		public void onStartHover(IButton button) {
+			this.getTexture().setTexture(b4);
+		}
+		
+		@Override
+		public void onClick(IButton button) {
+			
+		}
+	};
+	
+	private SFAbstractButton stararray2 = new SFAbstractButton(tacticalElements, "sqgui", schmpos, new Vector2f(0.0455f, 0.1f), varl) {
+		
+		@Override
+		public void whileHovering(IButton button) {
+			
+		}
+		
+		@Override
+		public void whileHolding(IButton button) {
+			fireStarbArrays(false); 
+		}
+		
+		@Override
+		public void onStopHover(IButton button) {
+			this.getTexture().setTexture(a4);
+		}
+		
+		@Override
+		public void onStartHover(IButton button) {
+			this.getTexture().setTexture(b4);
+		}
+		
+		@Override
+		public void onClick(IButton button) {
+			
+		}
+	};
+	
+	private SFAbstractButton stardorsalbuttonvar = new SFAbstractButton(tacticalElements, "sqgui", schmpos, new Vector2f(0.0455f, 0.05f), varl) {
+		
+		@Override
+		public void whileHovering(IButton button) {
+			
+		}
+		
+		@Override
+		public void whileHolding(IButton button) {
+			fireDorsalStarbArrays(starslider.getSliderValue() * 22.5f); 
+		}
+		
+		@Override
+		public void onStopHover(IButton button) {
+			this.getTexture().setTexture(a4);
+		}
+		
+		@Override
+		public void onStartHover(IButton button) {
+			this.getTexture().setTexture(b4);
+		}
+		
+		@Override
+		public void onClick(IButton button) {
+			
+		}
+	};
+	
+	private int a5 = Loader.loadTexture("shieldiconfilled");
+	private int b5 = Loader.loadTexture("shieldicon");
+	//BOOKMARK toggle shields
+	private SFAbstractButton toggleshields = new SFAbstractButton(tacticalElements, "shieldiconfilled", schmpos, new Vector2f(0.095f, 0.425f), TM.sqr4) {
+		
+		@Override
+		public void whileHovering(IButton button) {
+			
+		}
+		
+		@Override
+		public void whileHolding(IButton button) {
+			
+		}
+		
+		@Override
+		public void onStopHover(IButton button) {
+			
+		}
+		
+		@Override
+		public void onStartHover(IButton button) {
+			
+		}
+		
+		@Override
+		public void onClick(IButton button) {
+			shieldsOn = !shieldsOn;
+			if (shieldsOn) {
+				shieldsText.setColour(0, 1, 0.75f);
+				this.getTexture().setTexture(a5);
+			}
+			else {
+				shieldsText.setColour(0, 0, 1);
+				this.getTexture().setTexture(b5);
+			}
+		}
+	};
+	
+	private int a8 = Loader.loadTexture("rect");
+	private int b8 = Loader.loadTexture("rectfilled");
+	//BOOKMARK fire aft mounted phaser gun
+	private SFAbstractButton fireaftmountphaser = new SFAbstractButton(tacticalElements, "rect", schmpos, new Vector2f(-0.0045f, 0.075f), TM.sqr4) {
+
+		@Override
+		public void onClick(IButton button) {
+			
+		}
+
+		@Override
+		public void whileHolding(IButton button) {
+			fireMountedSternPhaser();
+		}
+
+		@Override
+		public void onStartHover(IButton button) {
+			this.getTexture().setTexture(b8);
+		}
+
+		@Override
+		public void onStopHover(IButton button) {
+			this.getTexture().setTexture(a8);
+		}
+
+		@Override
+		public void whileHovering(IButton button) {
+			
+		}
+		
+	};
+	
+	//BOOKMARK fire aft mounted phaser gun
+	private SFAbstractButton fireafttrailphaser = new SFAbstractButton(tacticalElements, "rect", schmpos, new Vector2f(-0.0045f, -0.34f), TM.sqr4) {
+
+		@Override
+		public void onClick(IButton button) {
+				
+		}
+
+		@Override
+		public void whileHolding(IButton button) {
+			fireSternEndPhaser();
+		}
+		
+		@Override
+		public void onStartHover(IButton button) {
+			this.getTexture().setTexture(b8);
+		}
+
+		@Override
+		public void onStopHover(IButton button) {
+			this.getTexture().setTexture(a8);
+		}
+
+		@Override
+		public void whileHovering(IButton button) {
+				
+		}
+			
+	};	
+	
+	//BOOKMARK fire turret to target
+	private SFAbstractButton fireturret = new SFAbstractButton(tacticalElements, "voyphaserdiag2", new Vector2f(hotbarx, hotbarheight + 0.075f), TM.sqr4) {
+		
+		@Override
+		public void whileHovering(IButton button) {
+			if (target == null)
+				this.getTexture().setTexture(a1);
+		}
+		
+		@Override
+		public void whileHolding(IButton button) {
+			if (target != null)
+				fireTurret(target.getPosition());
+		}
+		
+		@Override
+		public void onStopHover(IButton button) {
+			this.getTexture().setTexture(a1);
+		}
+		
+		@Override
+		public void onStartHover(IButton button) {
+			if (target != null)
+				this.getTexture().setTexture(b1);
+		}
+		
+		@Override
+		public void onClick(IButton button) {
+			if (target != null)
+				fireTurret(target.getPosition());
+		}
+	};
+	
 	//BOOKMARK switch LCARS to tactical
-	private SFAbstractButton changebuttontactical = new SFAbstractButton(miscElements, "tacticalicon", new Vector2f(0.324f, 0.36f), new Vector2f(0.04f / 1.68f, 0.04f)) {
+	private SFAbstractButton changebuttontactical = new SFAbstractButton(miscElements, "tacticalicon", new Vector2f(0.324f, 0.36f), TM.sqr4) {
 		
 		@Override
 		public void whileHovering(IButton button) {
@@ -183,7 +540,7 @@ public class PlayerWarshipVoyager extends Player {
 	};
 	
 	//BOOKMARK switch LCARS to helm
-	private SFAbstractButton changebuttonhelm = new SFAbstractButton(miscElements, "helmicon", new Vector2f(0.394f, 0.36f), new Vector2f(0.04f / 1.68f, 0.04f)) {
+	private SFAbstractButton changebuttonhelm = new SFAbstractButton(miscElements, "helmicon", new Vector2f(0.394f, 0.36f), TM.sqr4) {
 		
 		@Override
 		public void whileHovering(IButton button) {
@@ -221,6 +578,64 @@ public class PlayerWarshipVoyager extends Player {
 		}
 	};
 	
+	//BOOKMARK change viewscreen to minimap
+	private SFAbstractButton viewscreen_minimap = new SFAbstractButton(miscElements, "image", new Vector2f(0.324f, 0.96f), TM.sqr4) {
+		
+		@Override
+		public void whileHovering(IButton button) {
+			
+		}
+		
+		@Override
+		public void whileHolding(IButton button) {
+			
+		}
+		
+		@Override
+		public void onStopHover(IButton button) {
+			
+		}
+		
+		@Override
+		public void onStartHover(IButton button) {
+			
+		}
+		
+		@Override
+		public void onClick(IButton button) {
+			Main.screenFBOMode(Main.MAP);
+		}
+	};
+	
+	//BOOKMARK change viewscreen to aft
+	private SFAbstractButton viewscreen_aft = new SFAbstractButton(miscElements, "image", new Vector2f(0.374f, 0.96f), TM.sqr4) {
+			
+		@Override
+		public void whileHovering(IButton button) {
+				
+		}
+			
+		@Override
+		public void whileHolding(IButton button) {
+				
+		}
+			
+		@Override
+		public void onStopHover(IButton button) {
+				
+		}
+			
+		@Override
+		public void onStartHover(IButton button) {
+				
+		}
+			
+		@Override
+		public void onClick(IButton button) {
+			Main.screenFBOMode(Main.AFT);
+		}
+	};
+	
 	//BOOKMARK transfer button energy to shields
 	private SFAbstractButton energyshields = new SFAbstractButton(miscElements, "clear", new Vector2f(0.35f, 0.45f), new Vector2f(0.08f, 0.04f)) {
 		
@@ -231,7 +646,7 @@ public class PlayerWarshipVoyager extends Player {
 		
 		@Override
 		public void whileHolding(IButton button) {
-			if (SHIELD + 100 <= FULL_SHIELDS) {
+			if (shieldsOn && SHIELD + 100 <= FULL_SHIELDS) {
 				energy -= 500;
 				SHIELD += 100;
 			}
@@ -254,7 +669,7 @@ public class PlayerWarshipVoyager extends Player {
 	};
 	
 	//BOOKMARK autogun to standard
-	private SFAbstractButton autogunStd = new SFAbstractButton(tacticalElements, "image", new Vector2f(0.4f, 0.3f), new Vector2f(0.04f / 1.68f, 0.04f)) {
+	private SFAbstractButton autogunStd = new SFAbstractButton(tacticalElements, "image", new Vector2f(0.6f, -0.75f), TM.sqr4) {
 		
 		@Override
 		public void whileHovering(IButton button) {
@@ -270,7 +685,7 @@ public class PlayerWarshipVoyager extends Player {
 		public void onStopHover(IButton button) {
 			
 		}
-		
+		 
 		@Override
 		public void onStartHover(IButton button) {
 			
@@ -283,7 +698,7 @@ public class PlayerWarshipVoyager extends Player {
 	};
 	
 	//BOOKMARK autogun to dead-weight
-	private SFAbstractButton autogunDeadWeight = new SFAbstractButton(tacticalElements, "image", new Vector2f(0.5f, 0.3f), new Vector2f(0.04f / 1.68f, 0.04f)) {
+	private SFAbstractButton autogunDeadWeight = new SFAbstractButton(tacticalElements, "image", new Vector2f(0.65f, -0.75f), TM.sqr4) {
 		
 		@Override
 		public void whileHovering(IButton button) {
@@ -307,13 +722,55 @@ public class PlayerWarshipVoyager extends Player {
 	
 		@Override
 		public void onClick(IButton button) {
-		autoFunc = DEADWEIGHT;
+			autoFunc = DEADWEIGHT;
 		}
 		
 	};
 	
 	//BOOKMARK impulse speed slider
-	private SFVerticalSlider slider = new SFVerticalSlider(helmElements, 12, new Vector2f(0.65f, -0.5f), new Vector2f(0.08f / 1.68f, 0.08f), 0.04f, "knob", "ramp") {
+	private SFVerticalSlider impulseslider = new SFVerticalSlider(helmElements, 0.48f, 0.01f, 0, new Vector2f(0.65f, -0.5f), TM.sqr8, "knob", "ramp") {
+		
+		@Override
+		public void sliderStopHover(ISlider slider) {
+			
+		}
+		
+		@Override
+		public void sliderStartHover(ISlider slider) {
+			
+		}
+	};
+	
+	//BOOKMARK impulse speed slider
+	private SFVerticalSlider warpslider = new SFVerticalSlider(helmElements, 0.48f, 0.01f, 0, new Vector2f(0.81f, -0.5f), TM.sqr8, "knob", "ramp") {
+		
+		@Override
+		public void sliderStopHover(ISlider slider) {
+				
+		}
+			
+		@Override
+		public void sliderStartHover(ISlider slider) {
+				
+		}
+	};
+	
+	//BOOKMARK port phaser angle slider
+	private SFVerticalSlider portslider = new SFVerticalSlider(tacticalElements, 0.12f, -0.01f, 0, new Vector2f(0.325f, -0.345f), TM.sqr4, "knob", "tramp") {
+		
+		@Override
+		public void sliderStopHover(ISlider slider) {
+			
+		}
+		
+		@Override
+		public void sliderStartHover(ISlider slider) {
+			
+		}
+	};
+	
+	//BOOKMARK starboard phaser angle slider
+	private SFVerticalSlider starslider = new SFVerticalSlider(tacticalElements, 0.12f, -0.01f, 0, new Vector2f(0.48f, -0.345f), TM.sqr4, "knob", "tramp") {
 		
 		@Override
 		public void sliderStopHover(ISlider slider) {
@@ -334,7 +791,25 @@ public class PlayerWarshipVoyager extends Player {
 	//BOOKMARK
 	//BOOKMARK
 	
-	private SFAbstractButton abilityStinger = new SFAbstractButton(tacticalElements, "stinger", new Vector2f(0, 0), new Vector2f(0.04f / 1.68f, 0.04f)) {
+	private List<GUIText> abilityTexts = new ArrayList<GUIText>();
+	private float listpos = 0;
+	
+	private void addAbility(SFAbstractButton button, String msg) {
+		button.getTexture().setPosition(new Vector2f(0.8f, listpos));
+		button.getTexture().setScale(new Vector2f(0.075f, 0.065f / TM.GUI_SCALE_DIV));
+		GUIText o = new GUIText(msg, 1, TM.font, TM.coordtext(
+				
+				0.8f - 0.07f,
+				listpos + (0.08f / TM.GUI_SCALE_DIV / 2) + 0.01f)
+				
+				, 0.5f, false);
+		
+		o.setColour(0, 65f / 255f, 171f / 255f);
+		
+		listpos -= 0.1f;
+	}
+	
+	private SFAbstractButton abilityStinger = new SFAbstractButton(tacticalElements, "agray", new Vector2f(0.75f, -0.1f), TM.sqr4) {
 		
 		@Override
 		public void whileHovering(IButton button) {
@@ -344,7 +819,7 @@ public class PlayerWarshipVoyager extends Player {
 		@Override
 		public void whileHolding(IButton button) {
 			
-		}
+		} 
 		
 		@Override
 		public void onStopHover(IButton button) {
@@ -365,16 +840,24 @@ public class PlayerWarshipVoyager extends Player {
 	private void fireStinger() {
 		if (this.target != null) {
 			projectiles.add(new HomingTorpedo(privateTorpedoTexture, new Vector3f(super.getPosition())
-					, 2.5f, 2.5f, 6.25f, 1500, 10000, 15, 
+					, 2.5f, 2.5f, 6.25f, 1500, 10000 + (this.currentSpeed < 0 ? 0 : this.currentSpeed), 15, 
 					this.target,
-					(TaskManager.rng.nextFloat() * 2 - 1) * 10,
-					(TaskManager.rng.nextFloat() * 2 - 1) * 10,
-					(TaskManager.rng.nextFloat() * 2 - 1) * 10,
-					new ParticleTexture(Loader.loadTexture("particleAtlas"), 4), 1 , 40));
+					(TM.rng.nextFloat() * 2 - 1),
+					(TM.rng.nextFloat() * 2 - 1),
+					(TM.rng.nextFloat() * 2 - 1),
+					new ParticleTexture(Loader.loadTexture("particleAtlas"), 4), 1 , 40, new Runnable() {
+						
+						@Override
+						public void run() {
+							stingersrc.play(AudioEngine.loadSound("explosion"), 10000);
+						}
+					}));
+			
+			stingersrc.play(AudioEngine.loadSound("missile_launch"), 100);
 		}
 	}
 	
-	private SFAbstractButton abilityHydraRockets = new SFAbstractButton(tacticalElements, "image", new Vector2f(0, 0.1f), new Vector2f(0.04f / 1.68f, 0.04f)) {
+	private SFAbstractButton abilityHydraRockets = new SFAbstractButton(tacticalElements, "image", new Vector2f(0.85f, -0.1f), TM.sqr4) {
 		
 		@Override
 		public void whileHovering(IButton button) {
@@ -421,11 +904,11 @@ public class PlayerWarshipVoyager extends Player {
 	
 	private synchronized void fireHydraRockett() {
 		projectiles.add(new HomingTorpedo(privateTorpedoTexture, new Vector3f(getPosition())
-				, 2.5f, 2.5f, 6.25f, Torpedo.PT * 1.5f, 5000, 15, 
+				, 2.5f, 2.5f, 6.25f, Torpedo.PT * 1.5f, 5000 + (this.currentSpeed < 0 ? 0 : this.currentSpeed), 15, 
 				target,
-				(TaskManager.rng.nextFloat() * 2 - 1) * 10,
-				(TaskManager.rng.nextFloat() * 2 - 1) * 10,
-				(TaskManager.rng.nextFloat() * 2 - 1) * 10,
+				(TM.rng.nextFloat() * 2 - 1) * 10,
+				(TM.rng.nextFloat() * 2 - 1) * 10,
+				(TM.rng.nextFloat() * 2 - 1) * 10,
 				new ParticleTexture(texture, 4), 0.5f, 20));
 	}
 	
@@ -443,13 +926,195 @@ public class PlayerWarshipVoyager extends Player {
 							e.printStackTrace();
 						}
 					}
-					
+			
 				}
 				
 			};
 			firethings.start();
 		}
 	}
+	
+	private int a6 = Loader.loadTexture("grabmouse");
+	private int b6 = Loader.loadTexture("grabmousefilled");
+	//BOOKMARK grab mouse
+	private SFAbstractButton grabmouse = new SFAbstractButton(helmElements, "grabmouse", new Vector2f(0.45f, -0.9f), TM.sqrgui(0.06f)) {
+		
+		@Override
+		public void whileHovering(IButton button) {
+			
+		}
+		
+		@Override
+		public void whileHolding(IButton button) {
+			
+		}
+		
+		@Override
+		public void onStopHover(IButton button) {
+			this.getTexture().setTexture(a6);
+		}
+		
+		@Override
+		public void onStartHover(IButton button) {
+			this.getTexture().setTexture(b6);
+		}
+		
+		@Override
+		public void onClick(IButton button) {
+			Mouse.setGrabbed(true);
+			camera.setAngleAround(0);
+			camera.setPitch(20);
+			
+			for (IGUI el : miscElements) {
+				el.hide(guis);
+			}
+			
+			switch (currentPanel) {
+			
+			case TACTICAL_PANEL:
+				for (IGUI el : tacticalElements) {
+					el.hide(guis);
+				}
+				break;
+				
+			case HELM_PANEL:
+				for (IGUI el : helmElements) {
+					el.hide(guis);
+				}
+				break;
+			}
+			
+			gui_panel.setTexture(Loader.loadTexture("clear"));
+			//trmText.hide();
+			
+		}
+	};
+	
+	private int a7 = Loader.loadTexture("warpicon");
+	private int b7 = Loader.loadTexture("warpiconfilled");
+	//BOOKMARK move at warp
+	private boolean warpFlag = false;
+	private SFAbstractButton warpbutton = new SFAbstractButton(helmElements, "warpicon", new Vector2f(0.35f, -0.9f), TM.sqr8) {
+		
+		@Override
+		public void whileHovering(IButton button) {
+			
+		}
+		
+		@Override
+		public void whileHolding(IButton button) {
+			warpFlag = true;
+		}
+		
+		@Override
+		public void onStopHover(IButton button) {
+			this.getTexture().setTexture(a7);
+		}
+		
+		@Override
+		public void onStartHover(IButton button) {
+			this.getTexture().setTexture(b7);
+		}
+		
+		@Override
+		public void onClick(IButton button) {
+			
+		}
+	};
+	
+	//BOOKMARK maneuvaring 'joystick'
+	private boolean grabStick = false;
+	private SFAbstractButton joystick = new SFAbstractButton(helmElements, "cntrl", colPos, TM.sqr4, 0.1f, 0.1f) {
+		
+		@Override
+		public void whileHovering(IButton button) {
+			
+		}
+		
+		@Override
+		public void whileHolding(IButton button) {
+			
+		}
+		
+		@Override
+		public void onStopHover(IButton button) {
+			
+		}
+		
+		@Override
+		public void onStartHover(IButton button) {
+			
+		}
+		
+		@Override
+		public void onClick(IButton button) {
+			grabStick = true;
+		}
+	};
+	
+	//BOOKMARK break target
+	private SFAbstractButton breaktarget = new SFAbstractButton(tacticalElements, "break", schmpos, new Vector2f(0.13f, 0.325f), TM.sqr4) {
+		
+		@Override
+		public void whileHovering(IButton button) {
+			
+		}
+		
+		@Override
+		public void whileHolding(IButton button) {
+			
+		}
+		
+		@Override
+		public void onStopHover(IButton button) {
+			
+		}
+		
+		@Override
+		public void onStartHover(IButton button) {
+			
+		}
+		
+		@Override
+		public void onClick(IButton button) {
+			setTarget(null);
+			dropRetical();
+			trmText.setText(tag);
+			trmText.setColour(0, 0, 1);
+		}
+	};
+	
+	private GUIText rottext = new GUIText("", 1, TM.font, new Vector2f(0, 0), 0.25f, false);
+	
+	private SFAbstractButton temp = new SFAbstractButton(helmElements, "image", new Vector2f(0.5f, -0.5f), TM.sqr4) {
+		
+		@Override
+		public void whileHovering(IButton button) {
+			UPWARDS_ROT_CAP += Math.signum(Mouse.getDWheel());
+			UPWARDS_ROT_CAP = (UPWARDS_ROT_CAP < 15 ? 15 : UPWARDS_ROT_CAP);
+			UPWARDS_ROT_CAP = (UPWARDS_ROT_CAP > 90 ? 90 : UPWARDS_ROT_CAP);
+		}
+		
+		@Override
+		public void whileHolding(IButton button) {
+			
+		}
+		
+		@Override
+		public void onStopHover(IButton button) {
+			
+		}
+		
+		@Override
+		public void onStartHover(IButton button) {
+			
+		}
+		
+		@Override
+		public void onClick(IButton button) {
+			
+		}
+	};
 	
 	private int currentPanel = 1;
 	private final int TACTICAL_PANEL = 1;
@@ -469,13 +1134,12 @@ public class PlayerWarshipVoyager extends Player {
 	
 	Random rng = new Random();
 	
-	private GUITexture gui_panel;
-	private GUITexture schematic;
-	
 	//BOOKMARK: TACTICAL VARS
 	
 	private float HEALTH = 12500;
 	private float SHIELD = 100000;
+	
+	private boolean shieldsOn = true;
 	
 	private static final float FULL_SHIELDS = 100000;
 	
@@ -491,7 +1155,7 @@ public class PlayerWarshipVoyager extends Player {
 	private static final int TWO_SHOT = 1;
 	private static final int PHASER_QUANTUM = 2;
 	
-	private int autoFunc = 0;
+	private int autoFunc = 2;
 	
 	private static final int AUTO_MIN = 0;
 	private static final int AUTO_MAX = 3;
@@ -500,6 +1164,8 @@ public class PlayerWarshipVoyager extends Player {
 	private static final int DEADWEIGHT = 1;
 	private static final int GATLING = 2;
 	private static final int TORPEDO_SPLIT = 3;
+	
+	private int shotsFired = 0;
 	
 	private static final float distBetweenSlots = 0.05f;
 	private static final float hotbarheight = -0.9f;
@@ -512,14 +1178,13 @@ public class PlayerWarshipVoyager extends Player {
 	private GUIText shieldsText;
 	private GUIText energyText;
 	
-	private GUIText coordsX = new GUIText("Loading...", 1.7f, TaskManager.font, new Vector2f(0, 0), 0.5f, false);
-	private GUIText coordsY = new GUIText("Loading...", 1.7f, TaskManager.font, new Vector2f(0, 0.05f), 0.5f, false);
-	private GUIText coordsZ = new GUIText("Loading...", 1.7f, TaskManager.font, new Vector2f(0, 0.1f), 0.5f, false);
+	private GUIText coordsX = new GUIText("Loading...", 1.7f, TM.font, new Vector2f(0, 0), 0.5f, false);
+	private GUIText coordsY = new GUIText("Loading...", 1.7f, TM.font, new Vector2f(0, 0.05f), 0.5f, false);
+	private GUIText coordsZ = new GUIText("Loading...", 1.7f, TM.font, new Vector2f(0, 0.1f), 0.5f, false);
 	
 	private Particle retical;
 	
-	private Enemy target;
-	
+	@Override
 	public Enemy getTarget() {
 		return target;
 	}
@@ -533,25 +1198,45 @@ public class PlayerWarshipVoyager extends Player {
 				new Vector3f(0, 0, 0), 0, Float.POSITIVE_INFINITY, 0, 500, true);
 	}
 	
+	public void setPreRetical(Vector3f pos) {
+		this.retical = new Particle(new ParticleTexture(Loader.loadTexture("reticalpre"), 1), pos,
+				new Vector3f(0, 0, 0), 0, Float.POSITIVE_INFINITY, 45, 300, true);
+	}
+	
 	public void dropRetical() {
 		if (this.retical != null)
 			this.retical.setLife(0);
+		this.retical = null;
 	}
 	
+	private float mainPhaserTimer = 0;
+	
 	//BOOKMARK: NAVIGATION VARS
+	
+	private static final Vector2f colPos = new Vector2f(0, -0.1f); 
+	
+	private static final float MAX_WARP_FACTOR = 9.975f;
 	
 	private static final float FULL_IMPULSE_SPEED = 3000;
 	private static final float BOOST_SPEED = 5000;
 	
+	private static final float WARP_SPEED = 214000;
+	
 	private float IMPULSE_MOVE_SPEED_VAR = 0;
+	private float WARP_SPEED_VAR = 0;
 	private static final float TURN_SPEED = 180;
-	private static final float VERT_POWER = 60;
 	
 	private float currentSpeed = 0;
 	private float currentTurnSpeed = 0;
-	private float upwardsSpeed = 0;
+	
+	private float UPWARDS_ROT_CAP = 30;
 	
 	private GUITexture turrethotbar;
+	
+	private boolean flagUp = false;
+	private boolean flagDown = false;
+	private boolean flagLeft = false;
+	private boolean flagRight = false;
 	
 	//BOOKMARK: OPS VARS
 	
@@ -564,13 +1249,9 @@ public class PlayerWarshipVoyager extends Player {
 	//BOOKMARK: MISCELLANIOUS VARS
 	
 	private AudioSrc asrc = new AudioSrc();
-	
-	private int photonsnd = AudioEngine.loadSound("res/photon_torpedo.wav");
-	private int quantumsnd = AudioEngine.loadSound("res/quantum_torpedo.wav");
-	
-	
-	RawModel prephaser = OBJParser.loadObjModel("bolt");
-	TexturedModel privatePhaserTexture = new TexturedModel(prephaser, new ModelTexture(Loader.loadTexture("orange")));
+	private AudioSrc stingersrc = new AudioSrc();
+
+	TexturedModel privatePhaserTexture = TM.phaserBolt;
 	
 	RawModel pretorpedo = OBJParser.loadObjModel("photon");
 	TexturedModel privateTorpedoTexture = new TexturedModel(pretorpedo, new ModelTexture(Loader.loadTexture("photon")));
@@ -578,10 +1259,6 @@ public class PlayerWarshipVoyager extends Player {
 	
 	public PlayerWarshipVoyager(TexturedModel model, Vector3f position, float rotX, float rotY, float rotZ, float scale, List<GUITexture> guin) {
 		super(model, position, rotX, rotY, rotZ, scale, guin);
-		
-		privatePhaserTexture.getTexture().setUseFakeLighting(true);
-		privatePhaserTexture.getTexture().setSpecularMap(Loader.loadTexture("allGlow"));
-		privatePhaserTexture.getTexture().setBrightDamper(4);
 		
 		privatePhaserTexture.getTexture().setUseFakeLighting(true);
 		privateTorpedoTexture.getTexture().setSpecularMap(Loader.loadTexture("allGlow"));
@@ -598,38 +1275,81 @@ public class PlayerWarshipVoyager extends Player {
 	
 	private void initGUIS() {
 		
-		healthText = new GUIText("Loading...", 1.7f, TaskManager.font, new Vector2f(0.64f, 0.20f), 1, false);
+		healthText = new GUIText("Loading...", 1.7f, TM.font, new Vector2f(0.64f, 0.20f), 1, false);
 		healthText.setColour(1, 0, 0);
 		
-		shieldsText = new GUIText("Loading...", 1.7f, TaskManager.font, new Vector2f(0.64f, 0.25f), 1, false);
+		shieldsText = new GUIText("Loading...", 1.7f, TM.font, new Vector2f(0.64f, 0.25f), 1, false);
 		shieldsText.setColour(0, 1, 0.75f);
 		
-		energyText = new GUIText("Loading...", 1.7f, TaskManager.font, new Vector2f(0.64f, 0.15f), 1, false);
+		energyText = new GUIText("Loading...", 1.7f, TM.font, new Vector2f(0.64f, 0.15f), 1, false);
 		energyText.setColour(1, 0.75f, 0);
 		
 		coordsX.setColour(0, 1, 0);
 		coordsY.setColour(0, 1, 0);
 		coordsZ.setColour(0, 1, 0);
 		
+		rottext.setPosition(TM.coordtext(temp.getTexture().getPosition()));
+		rottext.getPosition().x -= 0.01f;
+		rottext.getPosition().y -= 0.05f;
+		rottext.setColour(0, 0, 1);
+		
+		trmText.setColour(0, 0, 1);
+		
+		impulseslider.setCounter(1, TM.font, 0, 0, 1);
+		warpslider.setCounter(1, TM.font, 0, 0, 1, new Callable<String>() {
+			
+			@Override
+			public String call() throws Exception {
+				return "Warp " + TM.df.format((warpslider.getSliderValue() * MAX_WARP_FACTOR));
+			}
+		});
+		
 		//GUITexture gui = new GUITexture(this.loader.loadTexture("orange"), new Vector2f(0.f, 0.5f), new Vector2f(0.05f, 0.5f));
 		//guis.add(gui);
-		gui_panel = new GUITexture(Loader.loadTexture("LCARSpanel"), new Vector2f(0.65f, -0.3f), new Vector2f(0.35f, 0.7f));
+		//gui_panel = new GUITexture(Loader.loadTexture("LCARSpanel"), panelpos, new Vector2f(0.35f, 0.7f));
 		guis.add(gui_panel);
-		
-		schematic = new GUITexture(Loader.loadTexture("schematic1"), new Vector2f(0.4045f, -0.3f), new Vector2f(0.233f, 0.466f));
 		tacticalElements.add(schematic);
+				
+		impulseslider.addMark(guis, "mk", new Vector2f(0.08f / 1.68f, 0.08f), 0.05f, 0.25f, "1/4", 1f, 0.04f
+				, 0, 65f / 255f, 171f / 255f);
 		
-		slider.addMark(guis, "mk", new Vector2f(0.08f / 1.68f, 0.08f), 0.05f, 0.25f, "1/4", 1f, 0.04f
+		impulseslider.addMark(guis, "mk", new Vector2f(0.08f / 1.68f, 0.08f), 0.05f, 0.5f, "1/2", 1f, 0.04f
+				, 0, 1, 1);
+		
+		impulseslider.addMark(guis, "mk", new Vector2f(0.08f / 1.68f, 0.08f), 0.05f, 0.75f, "3/4", 1f, 0.04f
 				, 1, 1, 0);
 		
-		slider.addMark(guis, "mk", new Vector2f(0.08f / 1.68f, 0.08f), 0.05f, 0.5f, "1/2", 1f, 0.04f
+		impulseslider.addMark(guis, "mk", new Vector2f(0.08f / 1.68f, 0.08f), 0.05f, 1, "full", 1f, 0.04f
 				, 1, 1, 0);
 		
-		slider.addMark(guis, "mk", new Vector2f(0.08f / 1.68f, 0.08f), 0.05f, 0.75f, "3/4", 1f, 0.04f
+		
+		
+		warpslider.addMark(guis, "mk", new Vector2f(0.08f / 1.68f, 0.08f), 0.05f, 1f / MAX_WARP_FACTOR, "Warp 1", 1f, 0.04f
 				, 1, 1, 0);
 		
-		slider.addMark(guis, "mk", new Vector2f(0.08f / 1.68f, 0.08f), 0.05f, 1, "full", 1f, 0.04f
+		warpslider.addMark(guis, "mk", new Vector2f(0.08f / 1.68f, 0.08f), 0.05f, 2f / MAX_WARP_FACTOR, "Warp 2", 1f, 0.04f
 				, 1, 1, 0);
+		
+		warpslider.addMark(guis, "mk", new Vector2f(0.08f / 1.68f, 0.08f), 0.05f, 3f / MAX_WARP_FACTOR, "Warp 3", 1f, 0.04f
+				, 1, 1, 0);
+		
+		warpslider.addMark(guis, "mk", new Vector2f(0.08f / 1.68f, 0.08f), 0.05f, 4f / MAX_WARP_FACTOR, "Warp 4", 1f, 0.04f
+				, 1, 1, 0);
+		
+		warpslider.addMark(guis, "mk", new Vector2f(0.08f / 1.68f, 0.08f), 0.05f, 5f / MAX_WARP_FACTOR, "Warp 5", 1f, 0.04f
+				, 1, 1, 0);
+		
+		warpslider.addMark(guis, "mk", new Vector2f(0.08f / 1.68f, 0.08f), 0.05f, 6f / MAX_WARP_FACTOR, "Warp 6", 1f, 0.04f
+				, 1, 1, 0);
+		
+		warpslider.addMark(guis, "mk", new Vector2f(0.08f / 1.68f, 0.08f), 0.05f, 7f / MAX_WARP_FACTOR, "Warp 7", 1f, 0.04f
+				, 1, 1, 0);
+		
+		warpslider.addMark(guis, "mk", new Vector2f(0.08f / 1.68f, 0.08f), 0.05f, 8f / MAX_WARP_FACTOR, "Warp 8", 1f, 0.04f
+				, 1, 1, 0);
+		
+		//addAbility(abilityStinger, "Fire Stinger");
+		//addAbility(abilityHydraRockets, "");
 		
 		//GUITexture bh0 = new GUITexture(Loader.loadTexture("hb0"), new Vector2f(0.65f, -0.35f), new Vector2f(0.04f / 1.68f, 0.04f));
 		//guis.add(bh0);
@@ -645,6 +1365,12 @@ public class PlayerWarshipVoyager extends Player {
 		
 		turrethotbar = new GUITexture(Loader.loadTexture("hotbarptr"), new Vector2f(hotbarx, hotbarheight), new Vector2f(0.04f / 1.68f, 0.04f));
 		tacticalElements.add(turrethotbar);
+		
+		frontphotonbutton.getTexture().setRotation(-15);
+		frontquantumbutton.getTexture().setFlipped(true);
+		frontquantumbutton.getTexture().setRotation(-15);
+		
+		spraybutton.getTexture().setRotation(180);
 		
 		/*phaserbutton = new SFAbstractButton("phaserbutton", new Vector2f(0.4f, 0), new Vector2f(0.04f / 1.68f, 0.04f)) {
 			
@@ -697,26 +1423,76 @@ public class PlayerWarshipVoyager extends Player {
 		coordsY.setText(Float.toString(super.getPosition().y));
 		coordsZ.setText(Float.toString(super.getPosition().z));
 		
-		for (IGUI el : miscElements) {
-			el.update();
+		rottext.setText(Float.toString(UPWARDS_ROT_CAP));
+		
+		if (shieldWarning && SHIELD > 0) {
+			shieldWarning = false;
 		}
 		
-		switch (currentPanel) {
+		schematic.setPosition(Vector2f.add(gui_panel.getPosition(), new Vector2f(-0.2455f, 0), null));
 		
-			case TACTICAL_PANEL:
-				for (IGUI el : tacticalElements) {
-					el.update();
-				}
-				break;
-				
-			case HELM_PANEL:
-				for (IGUI el : helmElements) {
-					el.update();
-				}
-				break;
+		//trmText.setColour(0, 148f / 255f, 1);
+		//trmText.setColour(211f / 255f, 0.3f, 0.2666f);
+		//trmText.setColour(119f / 255f, 68f / 255f, 102f / 255f);
+		
+		if (!Mouse.isGrabbed()) {
+			for (IGUI el : miscElements) {
+				el.update();
+			}
+			
+			warpFlag = false;
+			WARP_SPEED_VAR = 0;
+			
+			switch (currentPanel) {
+			
+				case TACTICAL_PANEL:
+					for (IGUI el : tacticalElements) {
+						el.update();
+					}
+					break;
+					
+				case HELM_PANEL:
+					for (IGUI el : helmElements) {
+						el.update();
+					}
+					break;
+			}	
 		}
 		
-		IMPULSE_MOVE_SPEED_VAR = FULL_IMPULSE_SPEED * slider.getSliderValue();
+		if (grabStick && Mouse.isButtonDown(0)) {
+			Vector2f tobe = DisplayManager.getNormalizedMouseCoords();
+			tobe.y = -tobe.y;
+			
+			if (!(SFMath.distance(tobe, colPos) > 0.35f)) {
+				joystick.getTexture().setPosition(tobe);
+				//joystick.getTexture().setRotation(-joystick.getTexture().getPosition().x * 100);
+				joystick.getTexture().setRotation(-super.getRotZ());
+			}
+			else {
+
+			}
+			
+			Vector2f cntrl = Vector2f.sub(colPos, joystick.getTexture().getPosition(), null);
+			
+			super.rotate(-cntrl.y * 2, cntrl.x * 5, -cntrl.x * 10);
+			
+			if (super.getRotZ() > 45) {
+				super.setRotZ(45);
+			}
+			else if (super.getRotZ() < -45) {
+				super.setRotZ(-45);
+			}
+			
+		}
+		else {
+			grabStick = false;
+			joystick.getTexture().setPosition(colPos);
+			joystick.getTexture().setRotation(0);
+		}
+			
+		
+		IMPULSE_MOVE_SPEED_VAR = FULL_IMPULSE_SPEED * impulseslider.getSliderValue();
+		WARP_SPEED_VAR = (float) Math.pow((warpslider.getSliderValue() * MAX_WARP_FACTOR), 1.25) * WARP_SPEED;
 
 	}
 	
@@ -725,18 +1501,38 @@ public class PlayerWarshipVoyager extends Player {
 	@Override
 	public void update(RaysCast caster) {
 		
-		if (this.target != null && this.target.isDead()) {
-			this.setTarget(null);
-			this.dropRetical();
+		if (this.target != null) {
+			
+			/*trmText.setText("Targeting Vessel at: "
+					+ (int) target.getPosition().x + ", "
+					+ (int) target.getPosition().y + ", "
+					+ (int) target.getPosition().z );*/
+			
+			statusQueue.add(new StatusText("Targeting Vessel at: "
+					+ (int) target.getPosition().x + ", "
+					+ (int) target.getPosition().y + ", "
+					+ (int) target.getPosition().z, 2, 
+					0, 0, 1));
+			
+			if (this.target.isDead()) {
+				this.setTarget(null);
+				this.dropRetical();
+			}
+			
 		}
 		
 		asrc.setPosition(getPosition().x, getPosition().y, getPosition().z);
+		stingersrc.setPosition(getPosition().x, getPosition().y, getPosition().z);
 		
 		if (energy < 0) {
 			energy = 0;
 		}
 		else if (energy > MAX_ENERGY) {
 			energy = MAX_ENERGY;
+		}
+		
+		if (!shieldsOn && SHIELD < FULL_SHIELDS) {
+			SHIELD++;
 		}
 		
 		//this.getBoundingBox().printSpecs("TEST");
@@ -749,25 +1545,44 @@ public class PlayerWarshipVoyager extends Player {
 		if (energyCounter > 1 && energy < MAX_ENERGY) {
 			if (energy < MAX_ENERGY * 0.9) {
 				if (energy > MAX_ENERGY * 0.5) {
-					energy += 5;
+					energy += 50;
 				}
 				else if (energy > MAX_ENERGY * 0.3) {
-					energy += 10;
+					energy += 100;
 				}
 				else if (energy > MAX_ENERGY * 0.2f) {
-					energy += 15;
+					energy += 150;
 				}
 				else {
-					energy += 35;
+					energy += 350;
 				}
 			}
 			else {
-				energy++;
+				energy += 10;;
 			}
 			energyCounter = 0;
 		}
 		
 		//System.out.println(Keyboard.getKeyName(Keyboard.getEventKey()));
+		
+		statusQueue.add(new StatusText(tag, 1, 0, 0, 1));
+		
+		if (shieldWarning) {
+			statusQueue.add(new StatusText("Warning: Shields Down", 3, 1, 0, 0));
+		}
+		
+		int highest = -32;
+		StatusText current = null;
+		
+		for (StatusText txt : statusQueue) {
+			if (txt.priority > highest) {
+				highest = txt.priority;
+				current = txt;
+			}
+		}
+		
+		trmText.conformToStatusText(current);
+		statusQueue.clear();
 		
 	}
 	
@@ -775,9 +1590,14 @@ public class PlayerWarshipVoyager extends Player {
 		checkInputs();
 		super.rotate(0, currentTurnSpeed * DisplayManager.getFrameTime(), 0);	
 		float distanceMoved = currentSpeed * DisplayManager.getFrameTime();
-		float dx = (float) (distanceMoved * Math.sin(Math.toRadians(super.getRotY())));
+		
 		float dy = (float) (distanceMoved * Math.sin(Math.toRadians(super.getRotX())));
-		float dz = (float) (distanceMoved * Math.cos(Math.toRadians(super.getRotY())));
+		
+		float l = (float) Math.cos(Math.toRadians(super.getRotX()));
+		
+		float dx = (float) (distanceMoved * Math.sin(Math.toRadians(super.getRotY()))) * l;
+		//float dy = (float) (distanceMoved * Math.sin(Math.toRadians(super.getRotX())));
+		float dz = (float) (distanceMoved * Math.cos(Math.toRadians(super.getRotY()))) * l;
 		super.move(dx, -dy, dz);
 		this.mx += dx; this.mx /= 2; this.my += dy; this.my /= 2; this.mz += dz; this.mz /= 2;
 		//super.move(0, upwardsSpeed * DisplayManager.getFrameTime(), 0);
@@ -785,45 +1605,112 @@ public class PlayerWarshipVoyager extends Player {
 		if (this.getRotY() < 0) {
 			this.setRotY(Math.abs(360 - this.getRotY()));
 		}
+		if (Mouse.isGrabbed()) {
+			float mx = Mouse.getDX();
+			this.rotate(-Mouse.getDY() * 0.025f, -mx * 0.1f, Math.signum(mx) * 0.9f);
+		}
+		
+		if (this.target != null && Keyboard.isKeyDown(Keyboard.KEY_X)) {
+			/*float mv = this.target.getPosition().y - super.getPosition().y;
+
+			super.move(0, mv * 0.03f, 0);
+			
+			if (super.getPosition().y < this.target.getPosition().y + 50) {
+				flagUp = true;
+			}
+			else if (super.getPosition().y > this.target.getPosition().y - 50) {
+				flagDown = true;
+			}
+			
+			float ty = SFMath.rotateToFaceVector(getPosition(), this.target.getPosition()).y;
+			
+			super.setRotY(ty + Math.signum(ty));*/
+			
+			Vector3f vec = SFMath.rotateToFaceVector(getPosition(), this.target.getPosition());
+			
+			float rot = super.getRotY() - vec.y;
+			
+			if (Math.abs(rot) > 180) {
+				rot += (rot > 0 ? -360 : 360);
+			}
+			
+			vec.x = -vec.x;
+			
+			float rtx = super.getRotX();
+			
+			if (Math.abs(rtx - vec.x) < 0.3f) {
+				super.setRotX(vec.x);
+				//System.out.println("Exception Made");
+			}
+			else if (rtx > vec.x) {
+				flagUp = true;
+			}
+			else if (rtx < vec.x) {
+				flagDown = true;
+			}
+			
+			//System.out.println(rot);
+			
+			if (rot < -0.3f) {
+				flagLeft = true;
+			}
+			else if (rot > 0.3f) {
+				flagRight = true;
+			}
+			
+		}
+		
 	}
 	
 	private void checkInputs() {
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_W) && !Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
 			this.currentSpeed = IMPULSE_MOVE_SPEED_VAR;
-			// TaskManager.warpParticleSystem.generateParticles(new Vector3f(super.getPosition()));
+			this.getModel().getTexture().setBrightDamper(4);
 		}
-		else if (Keyboard.isKeyDown(Keyboard.KEY_S))
+		else if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
+			this.getModel().getTexture().setBrightDamper(4);
 			this.currentSpeed = -IMPULSE_MOVE_SPEED_VAR;
+		}
 		
 		else if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.isKeyDown(Keyboard.KEY_W)) {
 			//this.currentSpeed = IMPULSE_MOVE_SPEED_VAR * 30 * 9.975f * 42;
-			TaskManager.warpParticleSystem.generateParticles(new Vector3f(super.getPosition()));
+			//TaskManager.warpParticleSystem.generateParticles(new Vector3f(super.getPosition()));
 			this.currentSpeed = BOOST_SPEED;
+			this.getModel().getTexture().setBrightDamper(1);
 		}
-		else 
-			this.currentSpeed = 0;
+		else {
+			if (warpFlag) {
+				this.currentSpeed = WARP_SPEED_VAR;
+			}
+			else {
+				this.currentSpeed = 0;
+			}
+			this.getModel().getTexture().setBrightDamper(4);
+		}
 		
-		if (Keyboard.isKeyDown(Keyboard.KEY_A)) { 
+		if (Keyboard.isKeyDown(Keyboard.KEY_A) || flagLeft) { 
+			flagLeft = false;
 			this.currentTurnSpeed = TURN_SPEED;
 			if (this.getRotZ() > -45)
-				super.rotate(0, 0, -0.6f);
+				super.rotate(0, 0, -60 * DisplayManager.getFrameTime());
 		}
-		else if (Keyboard.isKeyDown(Keyboard.KEY_D)) { 
+		else if (Keyboard.isKeyDown(Keyboard.KEY_D) || flagRight) { 
+			flagRight = false;
 			this.currentTurnSpeed = -TURN_SPEED;
 			if (this.getRotZ() < 45)
-				super.rotate(0, 0, 0.6f);
+				super.rotate(0, 0, 60 * DisplayManager.getFrameTime());
 		}
 		else {											
 			this.currentTurnSpeed = 0; 		
 			if (this.getRotZ() < 0) {
-				super.rotate(0, 0, 0.7f);
+				super.rotate(0, 0, 70 * DisplayManager.getFrameTime());
 				
 				if (this.getRotZ() > 0)
 					super.setRotZ(0);
 			}
 			else if (this.getRotZ() > 0) {
-				super.rotate(0, 0, -0.7f);
+				super.rotate(0, 0, -70 * DisplayManager.getFrameTime());
 				
 				if (this.getRotZ() < 0)
 					super.setRotZ(0);
@@ -833,36 +1720,49 @@ public class PlayerWarshipVoyager extends Player {
 		
 		//TODO: Rotate according to vertical speed
 		
-		if (Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
-			this.upwardsSpeed = VERT_POWER;
-			
-			if (super.getRotX() > -15)
-				super.rotate(-0.2f, 0, 0);
-			
-		} else if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
-			this.upwardsSpeed = -VERT_POWER;
-			if (super.getRotX() < 15)
-				super.rotate(0.2f, 0, 0);
-		}
-		else {
-			if (super.getRotX() < 0) {
-				super.rotate(0.3f, 0, 0);
+		if (!Mouse.isGrabbed()) {
+			if (Keyboard.isKeyDown(Keyboard.KEY_SPACE) || flagUp) {
 				
-				if (super.getRotX() > 0)
-					super.setRotX(0);
+				flagUp = false;
 				
-				while (this.upwardsSpeed > 0)
-					upwardsSpeed--;
+				if (super.getRotX() > -UPWARDS_ROT_CAP)
+					super.rotate(-20 * DisplayManager.getFrameTime(), 0, 0);
+				
+				if (super.getRotX() > 0) {
+					super.rotate(-60 * DisplayManager.getFrameTime(), 0, 0);
+					
+					if (super.getRotX() < 0)
+						super.setRotX(0);
+				}
+				
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || flagDown) {
+				
+				flagDown = false;
+				
+				if (super.getRotX() < UPWARDS_ROT_CAP)
+					super.rotate(20 * DisplayManager.getFrameTime(), 0, 0);
+				
+				if (super.getRotX() < 0) {
+					super.rotate(60 * DisplayManager.getFrameTime(), 0, 0);
+					
+					if (super.getRotX() > 0)
+						super.setRotX(0);
+				}
 			}
-			else if (super.getRotX() > 0) {
-				super.rotate(-0.3f, 0, 0);
-				
-				if (super.getRotX() < 0)
-					super.setRotX(0);
-
-				while (this.upwardsSpeed < 0)
-					upwardsSpeed++;
-			}
+			else if (!Keyboard.isKeyDown(Keyboard.KEY_C)) {
+				if (super.getRotX() < 0) {
+					super.rotate(30 * DisplayManager.getFrameTime(), 0, 0);
+					
+					if (super.getRotX() > 0)
+						super.setRotX(0);
+				}
+				else if (super.getRotX() > 0) {
+					super.rotate(-30 * DisplayManager.getFrameTime(), 0, 0);
+					
+					if (super.getRotX() < 0)
+						super.setRotX(0);
+				}
+			}	
 		}
 		
 		//Key ALT
@@ -884,7 +1784,32 @@ public class PlayerWarshipVoyager extends Player {
 			
 			turrethotbar.setPosition(new Vector2f(hotbarx + (turretFunc * distBetweenSlots), hotbarheight));
 			
-			System.out.println(turretFunc);
+		}
+		
+		if (Mouse.isGrabbed() && Keyboard.isKeyDown(Keyboard.KEY_GRAVE)) {
+			Mouse.setGrabbed(false);
+			
+			gui_panel.setTexture(Loader.loadTexture("LCARSpanel"));
+			//trmText.show();
+			
+			for (IGUI el : miscElements) {
+				el.show(guis);
+			}
+			
+			switch (currentPanel) {
+			
+			case TACTICAL_PANEL:
+				for (IGUI el : tacticalElements) {
+					el.show(guis);
+				}
+				break;
+				
+			case HELM_PANEL:
+				for (IGUI el : helmElements) {
+					el.show(guis);
+				}
+				break;
+			}
 			
 		}
 		
@@ -898,25 +1823,30 @@ public class PlayerWarshipVoyager extends Player {
 	
 	private void fireFrontPhasers() {
 		
-		Vector3f playerPos = (super.getPosition());
+		mainPhaserTimer += DisplayManager.getFrameTime();
 		
-		projectiles.add(new Bolt(privatePhaserTexture, new Vector3f((float) (playerPos.x + (Math.sin
-				(Math.toRadians(super.getRotY() - 90)) / 1.35) + Math.sin
-				(Math.toRadians(super.getRotY())) * 25), playerPos.y + 20.9f, (float) (playerPos.z + (Math.cos
-						(Math.toRadians(super.getRotY() - 90)) / 1.35) + Math.cos
-						(Math.toRadians(super.getRotY())) * 25)), super.getRotX(), super.getRotY(), 0, 1.5f, 1.5f, 8, 5, this.currentSpeed));
+		if (mainPhaserTimer > 0.005f) {
+			Vector3f playerPos = (super.getPosition());
+			
+			projectiles.add(new Bolt(privatePhaserTexture, new Vector3f((float) (playerPos.x + (Math.sin
+					(Math.toRadians(super.getRotY() - 90)) / 1.35) + Math.sin
+					(Math.toRadians(super.getRotY())) * 35), playerPos.y + 20.9f, (float) (playerPos.z + (Math.cos
+							(Math.toRadians(super.getRotY() - 90)) / 1.35) + Math.cos
+							(Math.toRadians(super.getRotY())) * 35)), super.getRotX(), super.getRotY(), 0, 1.5f, 1.5f, 8, 10, this.currentSpeed));
+			
+			projectiles.add(new Bolt(privatePhaserTexture, new Vector3f((float) (playerPos.x + (Math.sin(Math.toRadians(super.getRotY() + 90)) * 4) + Math.sin
+					(Math.toRadians(super.getRotY())) * 35), playerPos.y + 22.35f, (float) (playerPos.z + (Math.cos
+							(Math.toRadians(super.getRotY() + 90)) * 4) + Math.cos
+							(Math.toRadians(super.getRotY())) * 35) ), super.getRotX(), super.getRotY(), 0, 1.5f, 1.5f, 8, 5, this.currentSpeed));
+			
+			projectiles.add(new Bolt(privatePhaserTexture, new Vector3f((float) (playerPos.x + (Math.sin(Math.toRadians(super.getRotY() - 90)) * 5) + Math.sin
+					(Math.toRadians(super.getRotY())) * 35), playerPos.y + 22.35f, (float) (playerPos.z + (Math.cos
+							(Math.toRadians(super.getRotY() - 90)) * 5) + Math.cos
+							(Math.toRadians(super.getRotY())) * 35) ), super.getRotX(), super.getRotY(), 0, 1.5f, 1.5f, 8, 5, this.currentSpeed));
 		
-		projectiles.add(new Bolt(privatePhaserTexture, new Vector3f((float) (playerPos.x + (Math.sin(Math.toRadians(super.getRotY() + 90)) * 4) + Math.sin
-				(Math.toRadians(super.getRotY())) * 12), playerPos.y + 22.35f, (float) (playerPos.z + (Math.cos
-						(Math.toRadians(super.getRotY() + 90)) * 4) + Math.cos
-						(Math.toRadians(super.getRotY())) * 12) ), super.getRotX(), super.getRotY(), 0, 1.5f, 1.5f, 8, 5, this.currentSpeed));
-		
-		projectiles.add(new Bolt(privatePhaserTexture, new Vector3f((float) (playerPos.x + (Math.sin(Math.toRadians(super.getRotY() - 90)) * 5) + Math.sin
-				(Math.toRadians(super.getRotY())) * 12), playerPos.y + 22.35f, (float) (playerPos.z + (Math.cos
-						(Math.toRadians(super.getRotY() - 90)) * 5) + Math.cos
-						(Math.toRadians(super.getRotY())) * 12) ), super.getRotX(), super.getRotY(), 0, 1.5f, 1.5f, 8, 5, this.currentSpeed));
-	
-		energy -= 3;
+			energy -= 3;
+			mainPhaserTimer = 0;
+		}
 	
 	}
 	
@@ -928,7 +1858,7 @@ public class PlayerWarshipVoyager extends Player {
 		projectiles.add(Torpedo.photonTorpedo(super.getPosition(), this.currentSpeed + 4500,
 				5, 11, 11, super.getRotY(), super.getRotX()));
 		
-		energy -= 10;
+		energy -= 80;
 		
 	}
 	
@@ -940,7 +1870,7 @@ public class PlayerWarshipVoyager extends Player {
 		projectiles.add(Torpedo.quantumTorpedo(super.getPosition(), this.currentSpeed + 4500,
 				5, 11, 11, super.getRotY(), super.getRotX()));
 		
-		energy -= 15;
+		energy -= 140;
 				
 	}
 	
@@ -948,13 +1878,63 @@ public class PlayerWarshipVoyager extends Player {
 		
 		projectiles.add(new Bolt(privatePhaserTexture, new Vector3f(super.getPosition().x, super.getPosition().y + 10, super.getPosition().z), 
 				super.getRotX() + rng.nextFloat() * 2 - 1, super.getRotY() + rng.nextFloat() * 2 - 1, super.getRotZ(),
-				1.5f, 1.5f, 20, 3, mx, my, mz, false));
+				1.5f, 1.5f, 20, 300, mx, -my, mz, false));
 		
-		energy -= 1;
+		energy -= 100;
 		
 	}
 	
-	private void fireDorsalPortArrays() {
+	private void firePortArrays(boolean mode) {
+		
+		Vector3f rots;
+		Vector3f firing;
+		
+		if (mode) {
+			firing = SFMath.vecShifts(super.getRotY(), getPosition(), -9, 20, 57.5f);
+		}
+		else {
+			firing = SFMath.vecShifts(super.getRotY(), getPosition(), -10, 20, 45);
+		}
+		
+		if (this.target == null) {
+			rots = new Vector3f(-super.getRotX(), super.getRotY(), 0);
+		}
+		else {
+			rots = SFMath.rotateToFaceVector(firing, this.target.getPosition());
+		}
+		
+		projectiles.add(new Bolt(TM.phaserBolt, firing,
+				-rots.x, rots.y, 0,
+				1.5f, 1.5f, 20, 15, this.currentSpeed + 5000));
+		
+	}
+	
+	private void fireStarbArrays(boolean mode) {
+		
+		Vector3f rots;
+		Vector3f firing;
+		
+		if (mode) {
+			firing = SFMath.vecShifts(super.getRotY(), getPosition(), 9, 20, 57.5f);
+		}
+		else {
+			firing = SFMath.vecShifts(super.getRotY(), getPosition(), 10, 20, 45);
+		}
+		
+		if (this.target == null) {
+			rots = new Vector3f(-super.getRotX(), super.getRotY(), 0);
+		}
+		else {
+			rots = SFMath.rotateToFaceVector(firing, this.target.getPosition());
+		}
+		
+		projectiles.add(new Bolt(TM.phaserBolt, firing,
+				-rots.x, rots.y, 0,
+				1.5f, 1.5f, 20, 15, this.currentSpeed + 5000));
+		
+	}
+	
+	private void fireDorsalPortArrays(float angle) {
 		
 		projectiles.add(new Bolt(privatePhaserTexture, 
 				new Vector3f(super.getPosition().x + 
@@ -963,8 +1943,42 @@ public class PlayerWarshipVoyager extends Player {
 						, super.getPosition().y + 33,
 						super.getPosition().z + SFMath.relativePosShiftZ(SFMath.SF_DIRECTION_AZIMUTH_LEFT, super.getRotY(), 9.1f)
 						- SFMath.relativePosShiftZ(SFMath.SF_DIRECTION_AZIMUTH_NEUTRAL, super.getRotY(), 12)),
-				-super.getRotX() - 15, super.getRotY() + 180, 0
-				, 1.5f, 1.5f, 20, 69, mx, my, mz, true));
+				-super.getRotX() - angle, super.getRotY() + 180, 0
+				, 1.5f, 1.5f, 20, 10, mx, my, mz, true));
+		
+		energy--;
+		
+	}
+	
+	private void fireDorsalStarbArrays(float angle) {
+		
+		projectiles.add(new Bolt(privatePhaserTexture, 
+				new Vector3f(super.getPosition().x + 
+						SFMath.relativePosShiftX(SFMath.SF_DIRECTION_AZIMUTH_RIGHT, super.getRotY(), 9.1f)
+				- SFMath.relativePosShiftX(SFMath.SF_DIRECTION_AZIMUTH_NEUTRAL, super.getRotY(), 12)
+						, super.getPosition().y + 33,
+						super.getPosition().z + SFMath.relativePosShiftZ(SFMath.SF_DIRECTION_AZIMUTH_RIGHT, super.getRotY(), 9.1f)
+						- SFMath.relativePosShiftZ(SFMath.SF_DIRECTION_AZIMUTH_NEUTRAL, super.getRotY(), 12)),
+				-super.getRotX() - angle, super.getRotY() + 180, 0
+				, 1.5f, 1.5f, 20, 10, mx, my, mz, true));
+		
+		energy--;
+		
+	}
+	
+	private void fireMountedSternPhaser() {
+		
+		projectiles.add(Bolt.phaser(getPosition(), -0.5f, 21, 0, 10, super.getRotX(), super.getRotY() + 180, super.getRotZ(), this.currentSpeed));
+		
+		energy -= 1.5f;
+		
+	}
+	
+	private void fireSternEndPhaser() {
+		
+		projectiles.add(Bolt.phaser(getPosition(), -0.5f, 6.1f, 45, 10, super.getRotX(), super.getRotY() + 180, super.getRotZ(), this.currentSpeed)); 
+		
+		energy -= 1.5f;
 		
 	}
 	
@@ -974,7 +1988,7 @@ public class PlayerWarshipVoyager extends Player {
 		Vector3f target = new Vector3f(caster.getPointOnRay(ray, 200));
 			
 		if (Keyboard.isKeyDown(Keyboard.KEY_P))
-			fireFrontPhasers();
+			fireSternEndPhaser();
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_O) && counter < 0) {
 			fireSecondaryForwardPhotons();
@@ -1011,13 +2025,13 @@ public class PlayerWarshipVoyager extends Player {
 		counter -= DisplayManager.getFrameTime();
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_G)) {
-			fireDorsalPortArrays();
+			fireDorsalPortArrays(0);
 		}
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_Z) && !flag2) {
 			flag2 = true;
 			vec = SFMath.rotateToFaceVector(super.getPosition(), this.target != null ? this.target.getPosition() : new Vector3f(0, 0, 0));
-			alpha = vec.y - super.getRotY();
+			alpha = (vec.y % 360) - super.getRotY();
 		}
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_Y)) {
@@ -1076,6 +2090,8 @@ public class PlayerWarshipVoyager extends Player {
 		
 		autogunTimer += DisplayManager.getFrameTime();
 		
+		float spd = (this.currentSpeed < 0 ? 0 : this.currentSpeed);
+		
 		switch (autoFunc) {
 		
 		case STD_AUTO:
@@ -1083,9 +2099,11 @@ public class PlayerWarshipVoyager extends Player {
 				
 				this.projectiles.add(new HomingTorpedo(privateTorpedoTexture,
 						new Vector3f(super.getPosition()),
-						2, 2, 5, Torpedo.PT * 2, 3000, 10, target, 0, 5, 0));
+						2, 2, 5, Torpedo.PT * 2f, 3000 + spd, 10, target, 0, 5, 0));
 				
-				energy -= 20;
+				AudioEngine.playTempSrc(TM.photonsnd, 150, super.getPosition().x, super.getPosition().y, super.getPosition().z);
+				
+				energy -= 100;
 				autogunTimer = 0;
 			}
 			
@@ -1094,11 +2112,36 @@ public class PlayerWarshipVoyager extends Player {
 				
 				this.projectiles.add(new HomingTorpedo(privateTorpedoTexture,
 						new Vector3f(super.getPosition()),
-						2, 2, 5, Torpedo.PT * 2, 3000, 10, target, 0, 50, 0));
+						2, 2, 5, Torpedo.PT * 4.5f, 5000 + spd, 10, target, 0, 50, 0));
 				
-				energy -= 25;
+				AudioEngine.playTempSrc(TM.photonsnd, 150, super.getPosition().x, super.getPosition().y, super.getPosition().z);
+				
+				energy -= 202.5f;
 				autogunTimer = 0;
 			}
+			break;
+			
+		case GATLING:
+			if (autogunTimer > 1f) {
+				
+				this.projectiles.add(new HomingTorpedo(privateTorpedoTexture,
+						new Vector3f(super.getPosition()),
+						2, 2, 5, Torpedo.PT * 3f, 3000 + spd, 10, target, 0, 0, 0));
+				
+				AudioEngine.playTempSrc(TM.photonsnd, 150, super.getPosition().x, super.getPosition().y, super.getPosition().z);
+				
+				shotsFired++;
+				
+				if (shotsFired == 4) {
+					autogunTimer = 0;
+					shotsFired = 0;
+				}
+				else {
+					autogunTimer = 0.9f;
+				}
+				
+			}
+			break;
 		
 		}
 		
@@ -1106,15 +2149,18 @@ public class PlayerWarshipVoyager extends Player {
 	
 	public void fireTurret(float dx, float dy, float dz) {
 		
-		dx *= 10; dy *= 10; dz *= 10;
+		float cof = 40;
+		
+		dx *= cof; dy *= cof; dz *= cof;
 		
 		switch (turretFunc) {
 		
 		case ONE_TORP:
 			projectiles.add(Torpedo.photonTorpedo(super.getPosition(), dx, dy, dz));
+			energy -= 40;
 			break;
 			
-		case 1:
+		case TWO_SHOT:
 			projectiles.add(new Torpedo(privateTorpedoTexture, 
 					new Vector3f(super.getPosition()),
 					0, 0, 0, 2, 2, 5, Torpedo.PT, dx, dy, dz));
@@ -1122,6 +2168,7 @@ public class PlayerWarshipVoyager extends Player {
 			projectiles.add(new Torpedo(privateTorpedoTexture, 
 					new Vector3f(super.getPosition().x, super.getPosition().y + 10, super.getPosition().z),
 					0, 0, 0, 2, 2, 5, Torpedo.PT, dx, dy, dz));
+			energy -= 80;
 			break;
 		
 		}
@@ -1142,7 +2189,7 @@ public class PlayerWarshipVoyager extends Player {
 				
 				turretTimer = 0;
 				turretToggle = false;
-				energy -= 10;
+				energy -= 40;
 			}
 			break;
 			
@@ -1157,14 +2204,14 @@ public class PlayerWarshipVoyager extends Player {
 				
 				turretTimer = 0;
 				turretToggle = false;
-				energy -= 25;
+				energy -= 80;
 			}
 			break;
 			
-		case PHASER_QUANTUM:
+		case PHASER_QUANTUM: 
 			Vector3f rotations = SFMath.rotateToFaceVector(super.getPosition(), target);
 			projectiles.add(new Bolt(privatePhaserTexture, new Vector3f(super.getPosition().x, super.getPosition().y + 10, super.getPosition().z)
-					, -rotations.x, rotations.y, rotations.z, 1.5f, 1.5f, 10, 100, 0));
+					, -rotations.x, rotations.y, rotations.z, 1.5f, 1.5f, 10, 15, 0));
 			energy--;
 			
 			if (turretTimer > 0.5f || turretToggle) {
@@ -1173,7 +2220,7 @@ public class PlayerWarshipVoyager extends Player {
 				
 				turretTimer = 0;
 				turretToggle = false;
-				energy -= 15;
+				energy -= 70;
 			}
 			break;
 			
@@ -1187,16 +2234,16 @@ public class PlayerWarshipVoyager extends Player {
 
 	@Override
 	public void respondToCollisioni(float damage) {
-		if (this.SHIELD > 0) {
+		if (shieldsOn && this.SHIELD > 0) {
 			if (this.SHIELD - damage > 0) {
 				this.SHIELD -= damage;
-				TaskManager.blueShieldSystem.generateParticles(super.getPosition(), super.getPosition());
-				TaskManager.blueShieldSystem.generateParticles(super.getPosition(), super.getPosition());
+				TM.blueShieldSystem.generateParticles(super.getPosition(), super.getPosition());
 			}
 			else {
 				this.SHIELD = 0;
-				TaskManager.blueShieldSystem.generateParticles(super.getPosition(), super.getPosition());
-				TaskManager.blueShieldSystem.generateParticles(super.getPosition(), super.getPosition());
+				TM.blueShieldSystem.generateParticles(super.getPosition(), super.getPosition());
+				shieldWarning = true;
+				AudioEngine.playTempSrc(AudioEngine.loadSound("critical_stereo"), 200);
 			}
 		}
 		else {
@@ -1208,10 +2255,6 @@ public class PlayerWarshipVoyager extends Player {
 		
 	}
 	
-	public List<Projectile> getProjectiles() {
-		return projectiles;
-	}
-	
 	@Override
 	public void choreCollisions(List<Enemy> enemies, RaysCast caster) {
 		 
@@ -1221,8 +2264,20 @@ public class PlayerWarshipVoyager extends Player {
 			
 			BoundingBox bb1 = enemy.getBoundingBox(); 
 			
-			if (caster.penetrates(bb1)) {
+			if (!Mouse.isGrabbed() && caster.penetrates(bb1)) {
+				
+				if (this.retical == null) {
+					this.setPreRetical(enemy.getPosition());
+				}
+				
 				virg = false;
+
+				try {
+					Mouse.setNativeCursor(Loader.loadCursor("bullseye"));
+				} catch (LWJGLException e) {
+					e.printStackTrace();
+				}
+				
 				if (Mouse.isButtonDown(0)) {
 					while (Mouse.next()) {
 						if (Mouse.getEventButtonState()) {
@@ -1261,14 +2316,31 @@ public class PlayerWarshipVoyager extends Player {
 				
 				if (bb1.intersects(bb2)) {
 					projectile.respondToCollision();
-					((BorgVessel) enemy).respondToCollisioni(((Projectile) projectile).getDamage());
+					enemy.respondToCollisioni(((Projectile) projectile).getDamage());
 				}
 				
+			}
+			
+			if (bb1.intersects(this.getBoundingBox())) {
+				enemy.respondToCollisioni(500);
+				this.respondToCollisioni(0);
 			}
 			
 		}
 		
 		if (virg) {
+			
+			if (this.target == null)
+				this.dropRetical();
+			
+			if (Mouse.getNativeCursor() != DisplayManager.cursor) {
+				try {
+					Mouse.setNativeCursor(DisplayManager.cursor);
+				} catch (LWJGLException e) {
+					e.printStackTrace();
+				}
+			}
+			
 			while (Mouse.next()) {
 				if (Mouse.getEventButtonState()) {
 					if (Mouse.getEventButton() == 1) {
@@ -1280,6 +2352,14 @@ public class PlayerWarshipVoyager extends Player {
 			
 		}
 		
+	}
+	
+	@Override
+	public Vector3f getPlayerPos() {
+		return super.getPosition();
+		/*return new Vector3f(super.getPosition().x + (TM.rng.nextFloat() - 0.5f) * 100000,
+				super.getPosition().y + (TM.rng.nextFloat() - 0.5f) * 10000,
+				super.getPosition().z + (TM.rng.nextFloat() - 0.5f) * 100000);*/
 	}
 	
 }

@@ -9,6 +9,6 @@ uniform sampler2D colourTexture;
 void main(void) {
 
 	out_Colour = texture(colourTexture, textureCoords);
-	out_Colour *= 3.2f;
+	out_Colour *= 4f;
 
 }

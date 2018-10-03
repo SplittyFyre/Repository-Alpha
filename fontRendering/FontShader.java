@@ -1,7 +1,7 @@
 package fontRendering;
 
 import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
+import org.lwjgl.util.vector.Vector4f;
 
 import renderEngine.ShaderProgram;
 
@@ -29,8 +29,8 @@ public class FontShader extends ShaderProgram{
 		super.bindAttribute(1, "textureCoords");
 	}
 	
-	public void loadColour(Vector3f colour) {
-		super.loadVector(location_colour, colour);
+	public void loadColour(Vector4f colour) {
+		super.load4dVector(location_colour, colour);
 	}
 	
 	public void loadTranslation(Vector2f translation) {

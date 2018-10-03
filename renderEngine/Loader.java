@@ -1,6 +1,7 @@
 package renderEngine;
 
-import java.io.FileInputStream;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -8,7 +9,11 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+
 import org.lwjgl.BufferUtils;
+import org.lwjgl.LWJGLException;
+import org.lwjgl.input.Cursor;
 import org.lwjgl.opengl.EXTTextureFilterAnisotropic;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -26,7 +31,6 @@ import de.matthiasmann.twl.utils.PNGDecoder;
 import de.matthiasmann.twl.utils.PNGDecoder.Format;
 import renderEngine.models.RawModel;
 import renderEngine.textures.TextureData;
-import utils.SFUT;
 
 public class Loader {
 	
@@ -99,15 +103,17 @@ public class Loader {
 		Texture texture = null;
 		
 		try {
-			texture = TextureLoader.getTexture("PNG", new FileInputStream("res/" + fileName + ".png"));
+			texture = TextureLoader.getTexture("PNG", Class.class.getResourceAsStream("/res/" + fileName + ".png"));
 			
 			GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
 			GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
 			GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL14.GL_MAX_TEXTURE_LOD_BIAS, -0.4f);
-			if (GLContext.getCapabilities().GL_EXT_texture_filter_anisotropic)
+			if (GLContext.getCapabilities().GL_EXT_texture_filter_anisotropic) {
 				GL11.glTexParameterf(GL11.GL_TEXTURE_2D, EXTTextureFilterAnisotropic.GL_TEXTURE_MAX_ANISOTROPY_EXT, anisoAmout);
-			else
-				SFUT.println("Your driver does not support Anisotropic Filtering");
+			}
+			else {
+				System.out.println("Your driver does not support Anisotropic Filtering");
+			}
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -140,7 +146,7 @@ public class Loader {
 		GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, texID);
 		
 		for (int i = 0; i < textureFiles.length; i++) {
-			TextureData data = decodeTextureFile("res/" + textureFiles[i] + ".png");
+			TextureData data = decodeTextureFile(textureFiles[i]);
 			GL11.glTexImage2D(GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL11.GL_RGBA, data.getWidth(), data.getHeight(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, data.getBuffer());
 		}
 		
@@ -162,7 +168,7 @@ public class Loader {
 		
 		try {
 			@SuppressWarnings("resource")
-			FileInputStream in = new FileInputStream(fileName);
+			InputStream in = Class.class.getResourceAsStream("/res/" + fileName + ".png");
 			PNGDecoder decoder = new PNGDecoder(in);
 			width = decoder.getWidth();
 			height = decoder.getHeight();
@@ -205,7 +211,7 @@ public class Loader {
 		ByteBuffer buf = null;
 		
 		try {
-			InputStream is = new FileInputStream(path);
+			InputStream is = Class.class.getResourceAsStream("/res/" + path + ".png");
 			PNGDecoder dec = new PNGDecoder(is);
 			buf = ByteBuffer.allocateDirect(dec.getWidth() * dec.getHeight() * 4);
 			dec.decode(buf, dec.getWidth() * 4, PNGDecoder.Format.RGBA);
@@ -217,5 +223,41 @@ public class Loader {
 		return buf;
 		
 	}
+	
+	public static Cursor loadCursor(String pathmsrc) {
+		
+		BufferedImage img = null;
+		try {
+			img = ImageIO.read(Class.class.getResourceAsStream("/res/" + pathmsrc + ".png"));
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
+		final int w = img.getWidth();
+	    final int h = img.getHeight();
 
+	    int rgbData[] = new int[w * h];
+
+	    for (int i = 0; i < rgbData.length; i++) {
+	        int x = i % w;
+	        int y = h - 1 - i / w; // this will also flip the image vertically
+
+	        rgbData[i] = img.getRGB(x, y);
+	    }
+
+	    IntBuffer buffer = BufferUtils.createIntBuffer(w * h);
+	    buffer.put(rgbData);
+	    buffer.rewind();
+
+	    Cursor cursor = null;
+		try {
+			cursor = new Cursor(w, h, 2, h - 2, 1, buffer, null);
+		} catch (LWJGLException e) {
+			e.printStackTrace();
+		}
+
+	    return cursor;
+		
+	}
+	
 }

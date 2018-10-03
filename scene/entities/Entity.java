@@ -15,10 +15,15 @@ public abstract class Entity {
 	private BoundingBox boundingBox;
 	private final BoundingBox staticBoundingBox;
 	
+	public Entity matpremul = null;
+	
 	public boolean customRotationAxis = false;
+	public boolean ignoreRY = false;
 	public Vector3f customOrigin = null;
 	
 	public Vector4f highlight = null;
+	
+	public boolean translucent = false;
 	
 	public Vector4f getHighlight() {
 		return highlight;
@@ -57,6 +62,21 @@ public abstract class Entity {
 		this.scaleZ = scaleZ;
 		this.boundingBox = new BoundingBox(this.getModel().getRawModel().getBoundingBox());
 		this.staticBoundingBox = new BoundingBox(boundingBox);
+	}
+	
+	public Entity(TexturedModel model, int index, Vector3f position, float rotX, float rotY, float rotZ, float scale) {
+		
+		this.model = model;
+		this.position = position;
+		this.rotX = rotX;
+		this.rotY = rotY;
+		this.rotZ = rotZ;
+		this.scaleX = scale;
+		this.scaleY = scale;
+		this.scaleZ = scale;
+		this.boundingBox = new BoundingBox(this.getModel().getRawModel().getBoundingBox());
+		this.staticBoundingBox = new BoundingBox(boundingBox);
+		
 	}
 
 	public float getTextureXOffset() {

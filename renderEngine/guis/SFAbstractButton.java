@@ -15,10 +15,18 @@ public abstract class SFAbstractButton implements IButton, IGUI {
 	private Vector2f defaultScale;
 	private boolean isHidden = true, isHovering = false;
 	private float px = 0, py = 0;
+	private Vector2f origin = null;
 	
 	public SFAbstractButton(List<IGUI> list, String texture, Vector2f position, Vector2f scale) {
 		buttonTexture = new GUITexture(Loader.loadTexture(texture), position, scale);
 		defaultScale = new Vector2f(scale);
+		list.add(this);
+	}
+	
+	public SFAbstractButton(List<IGUI> list, String texture, Vector2f origin, Vector2f position, Vector2f scale) {
+		buttonTexture = new GUITexture(Loader.loadTexture(texture), origin, position, scale);
+		defaultScale = new Vector2f(scale);
+		this.origin = origin;
 		list.add(this);
 	}
 	
@@ -49,8 +57,8 @@ public abstract class SFAbstractButton implements IButton, IGUI {
 	
 	@Override
 	public void update() {
-		buttonUpdate()
-;	}
+		buttonUpdate();
+	}
 	
 	@Override
 	public void hide(List<GUITexture> textures) {

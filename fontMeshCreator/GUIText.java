@@ -1,9 +1,10 @@
 package fontMeshCreator;
 
 import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
+import org.lwjgl.util.vector.Vector4f;
 
 import fontRendering.TextMaster;
+import scene.entities.entityUtils.StatusText;
 
 /**
  * Represents a piece of text in the game.
@@ -20,7 +21,7 @@ public class GUIText {
 
 	private int textMeshVao;
 	private int vertexCount;
-	private Vector3f colour = new Vector3f(0f, 0f, 0f);
+	private Vector4f colour = new Vector4f(0f, 0f, 0f, 1f);
 
 	private Vector2f position;
 	private float lineMaxSize;
@@ -29,6 +30,10 @@ public class GUIText {
 	private FontType font;
 
 	private boolean centerText = false;
+	
+	public void setPosition(Vector2f in) {
+		this.position = in;
+	}
 
 	/**
 	 * Creates a new text, loads the text's quads into a VAO, and adds the text
@@ -64,6 +69,17 @@ public class GUIText {
 		this.lineMaxSize = maxLineLength;
 		this.centerText = centered;
 		TextMaster.addText(this);
+	}
+	
+	public GUIText(String text, float fontSize, FontType font, Vector2f position, float maxLineLength,
+			boolean centered, int i) {
+		this.textString = text;
+		this.fontSize = fontSize;
+		this.font = font;
+		this.position = position;
+		this.lineMaxSize = maxLineLength;
+		this.centerText = centered;
+		TextMaster.addTextToSecondaryBuffer(this);
 	}
 	
 	public void setText(String text) {
@@ -119,11 +135,28 @@ public class GUIText {
 	public void setColour(float r, float g, float b) {
 		colour.set(r, g, b);
 	}
+	
+	public void setColour(float r, float g, float b, float a) {
+		colour.set(r, g, b, a);
+	}
+	
+	public void setAlpha(float a) {
+		colour.w = a;
+	}
+	
+	public void plusAlpha(float p) {
+		colour.w += p;
+	}
+	
+	public void conformToStatusText(StatusText txt) {
+		setColour(txt.r, txt.g, txt.b);
+		setText(txt.msg);
+	}
 
 	/**
 	 * @return the colour of the text.
 	 */
-	public Vector3f getColour() {
+	public Vector4f getColour() {
 		return colour;
 	}
 

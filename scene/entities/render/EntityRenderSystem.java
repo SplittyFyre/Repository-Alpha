@@ -43,8 +43,14 @@ public class EntityRenderSystem {
 			List<Entity> batch = entities.get(model);
 			for (Entity entity : batch) {
 				prepareInstance(entity);
+				if (entity.translucent) {
+					GL11.glEnable(GL11.GL_BLEND);
+					GL11.glBlendFunc(GL11.GL_ONE_MINUS_SRC_COLOR, GL11.GL_ONE);
+					//GL11.glBlendFunc(GL11.GL_ONE_MINUS_SRC_COLOR, GL11.GL_ONE_MINUS_SRC_ALPHA);
+				}
 				GL11.glDrawElements(GL11.GL_TRIANGLES, model.getRawModel().getVertexCount(),
 						GL11.GL_UNSIGNED_INT, 0);
+				GL11.glDisable(GL11.GL_BLEND);
 			}
 			unbindTexturedModel();
 		}
@@ -98,8 +104,14 @@ public class EntityRenderSystem {
 		Matrix4f transformationMatrix;
 		
 		if (entity.customRotationAxis && entity.customOrigin != null) {
-			transformationMatrix = SFMath.createTransformationMatrix(new Vector3f(entity.getPosition()), entity.customOrigin,
-					entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+			if (entity.ignoreRY) {
+				transformationMatrix = SFMath.createTransformationMatrix(new Vector3f(entity.getPosition()), entity.customOrigin,
+						entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale(), true);
+			}
+			else {
+				transformationMatrix = SFMath.createTransformationMatrix(new Vector3f(entity.getPosition()), entity.customOrigin,
+						entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());	
+			}
 		}
 		else {
 			transformationMatrix = SFMath.createTransformationMatrix(entity.getPosition(),

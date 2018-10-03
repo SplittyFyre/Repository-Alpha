@@ -1,11 +1,5 @@
 package scene.terrain;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
-
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -27,6 +21,10 @@ public class Terrain {
 	private TerrainTexture blendMap;
 	private float size;
 	
+	public boolean base = false;
+	public boolean isSeeded = false;
+	private int seed;
+	
 	float[][] heights;
 	
 	public Terrain(float x, float y, float z, float size, TerrainTexturePack texturePack, TerrainTexture blendMap, String heightMap) {
@@ -36,7 +34,30 @@ public class Terrain {
 		this.x = x - (size / 2);
 		this.y = y;
 		this.z = z - (size / 2);
-		this.model = generateTerrain(heightMap);
+		this.model = generateTerrain(128);
+	}
+	
+	public Terrain(float x, float y, float z, float size, TerrainTexturePack texturePack, TerrainTexture blendMap, String heightMap, int seed) {
+		this.size = size;
+		this.texturePack = texturePack;
+		this.blendMap = blendMap;
+		this.x = x - (size / 2);
+		this.y = y;
+		this.z = z - (size / 2);
+		this.seed = seed;
+		this.isSeeded = true;
+		this.model = generateTerrain(128);
+	}
+	
+	public Terrain(float x, float y, float z, float size, TerrainTexturePack texturePack, TerrainTexture blendMap, String heightMap, boolean base) {
+		this.size = size;
+		this.texturePack = texturePack;
+		this.blendMap = blendMap;
+		this.x = x - (size / 2);
+		this.y = y;
+		this.z = z - (size / 2);
+		this.base = base;
+		this.model = generateTerrain(32);
 	}
 	
 	public float getX() {
@@ -93,20 +114,16 @@ public class Terrain {
 		return answer;
 	}
 	
-	private RawModel generateTerrain(String heightMap) {
+	private RawModel generateTerrain(int VERTEX_COUNT) {
 		
-		NoiseGenerator generator = new NoiseGenerator();
+		NoiseGenerator generator;
 		
-		BufferedImage image = null;
-		
-		try {
-			image = ImageIO.read(new File("res/" + heightMap + ".png"));
-		} catch (IOException e) {
-			
-			e.printStackTrace();
+		if (isSeeded) {
+			generator = new NoiseGenerator(this.seed);
 		}
-		
-		int VERTEX_COUNT = 128;
+		else {
+			generator = new NoiseGenerator(this.base);
+		}
 		
 		heights = new float[VERTEX_COUNT][VERTEX_COUNT];
 		int count = VERTEX_COUNT * VERTEX_COUNT;
@@ -170,6 +187,12 @@ public class Terrain {
 	
 	private float getHeight(int x, int z, NoiseGenerator generator) {
 		return generator.generateHeight(x, z);
+	}
+	
+	public void addVec(Vector3f vec) {
+		this.x += vec.x;
+		this.y += vec.y;
+		this.z += vec.z;
 	}
 
 }

@@ -1,8 +1,5 @@
 package audio;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,16 +33,21 @@ public class AudioEngine {
 	}
 	
 	public static int loadSound(String file) {
-		int buffer = AL10.alGenBuffers();
-		buffers.add(buffer);
-		WaveData wave = null;
+		int buffer = 0;
 		try {
-			wave = WaveData.create(new BufferedInputStream(new FileInputStream(file)));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			buffer = AL10.alGenBuffers();
+			buffers.add(buffer);
+			//ClassLoader load = Class.class.getClassLoader();
+			//URL url = load.getResource("/res/" + file + ".wav");
+			WaveData wave = WaveData.create(Class.class.getResourceAsStream("/res/" + file + ".wav"));
+			//WaveData wave = WaveData.create(url);
+			AL10.alBufferData(buffer, wave.format, wave.data, wave.samplerate);
+			wave.dispose();
 		}
-		AL10.alBufferData(buffer, wave.format, wave.data, wave.samplerate);
-		wave.dispose();
+		catch (Exception e) {
+			
+		}
+		
 		return buffer;
 	}
 	
@@ -82,6 +84,13 @@ public class AudioEngine {
 				el = null;
 			}
 		}
+		
+		//System.out.println(autoKills.size());
+		
+		//if (autoKills.size() > 100) {
+		//	autoKills.clear();
+		//}
+		
 	}
 
 }

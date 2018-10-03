@@ -32,9 +32,13 @@ public class GUIRenderer {
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 		for (GUITexture texture : guis) {
+			
+			shader.loadAlphaFlag(texture.flagAlpha);
+			shader.loadCustomAlpha(texture.custAlpha);
+			
 			GL13.glActiveTexture(GL13.GL_TEXTURE0);
 			GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.getTextureID());
-			Matrix4f matrix = SFMath.createTransformationMatrix(texture.getPosition(), texture.getScale(), texture.getRotation());
+			Matrix4f matrix = SFMath.createTransformationMatrix(texture.getPosition(), texture.getScale(), texture.getRotation(), texture.isFlipped());
 			shader.loadTransformation(matrix);
 			GL11.glDrawArrays(GL11.GL_TRIANGLE_STRIP, 0, quad.getVertexCount());
 		}

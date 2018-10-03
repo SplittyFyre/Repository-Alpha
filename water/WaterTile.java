@@ -1,5 +1,7 @@
 package water;
 
+import org.lwjgl.util.vector.Vector3f;
+
 public class WaterTile {
 	
 	public float size;
@@ -39,6 +41,12 @@ public class WaterTile {
 
 	public float getZ() {
 		return z;
+	}
+	
+	public void addVec(Vector3f vec) {
+		this.x += vec.x;
+		this.height += vec.y;
+		this.z += vec.z;
 	}
 
 }
