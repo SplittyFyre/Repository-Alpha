@@ -26,23 +26,19 @@ public class FloatingOrigin {
 		float transZ = 0;
 		
 		if (player.getPosition().x > part) {
-			//transX = act - player.getPosition().x;
 			transX = -gridLen;
 			gridX++;
 		}
 		else if (player.getPosition().x < -part) {
-			//transX = actneg - player.getPosition().x;
 			transX = gridLen;
 			gridX--;
 		}
 		
 		if (player.getPosition().z > part) {
-			//transZ = act - player.getPosition().z;
 			transZ = -gridLen;
 			gridZ++;
 		}
 		else if (player.getPosition().z < -part) {
-			//transZ = actneg - player.getPosition().z;
 			transZ = gridLen;
 			gridZ--;
 		}
