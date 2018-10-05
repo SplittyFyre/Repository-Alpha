@@ -280,7 +280,7 @@ public class PlayerWarshipVoyager extends Player {
 		
 		@Override
 		public void onClick(IButton button) {
-			
+			 
 		}
 	};
 	
@@ -1668,7 +1668,7 @@ public class PlayerWarshipVoyager extends Player {
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_A) || flagLeft) { 
 			flagLeft = false;
-			//this.currentTurnSpeed = TURN_SPEED;
+			this.currentTurnSpeed = TURN_SPEED;
 			if (this.getRotZ() > -45)
 				super.rotate(0, 0, -60 * DisplayManager.getFrameTime());
 		}
@@ -1831,7 +1831,7 @@ public class PlayerWarshipVoyager extends Player {
 			
 			Vector3f down = new Vector3f(actpos.x, actpos.y, actpos.z);
 			
-			projectiles.add(Bolt.phaser(down, 75, super.getRotX(), super.getRotY(), 0, 0));
+			projectiles.add(Bolt.phaser(down, 75, super.getRotX(), super.getRotY(), super.getRotZ(), this.currentSpeed));
 			
 			ENERGY -= 3;
 			mainPhaserTimer = 0;

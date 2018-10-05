@@ -6,21 +6,21 @@ import scene.entities.players.Player;
 
 public class FloatingOrigin {
 	
-	private Player player;
+	private static Player player;
 	
-	private float gridLen;
-	private float part;
+	private static float gridLen;
+	private static float part;
 	
-	private int gridX = 0;
-	private int gridZ = 0;
-	
-	public FloatingOrigin(Player player, float gridSideLen) {
-		this.player = player;
-		this.gridLen = gridSideLen;
-		this.part = this.gridLen / 2;
+	private static int gridX = 0;
+	private static int gridZ = 0;
+
+	public static void init(Player player, float gridSideLen) {
+		FloatingOrigin.player = player;
+		gridLen = gridSideLen;
+		part = gridLen / 2;
 	}
 	
-	public Vector3f update() {
+	public static Vector3f update() {
 		
 		float transX = 0;
 		float transZ = 0;
@@ -47,11 +47,11 @@ public class FloatingOrigin {
 		
 	}
 	
-	public int getGridX() {
+	public static int getGridX() {
 		return gridX;
 	}
 
-	public int getGridZ() {
+	public static int getGridZ() {
 		return gridZ;
 	}
 
