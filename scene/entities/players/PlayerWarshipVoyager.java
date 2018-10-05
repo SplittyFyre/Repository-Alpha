@@ -8,8 +8,10 @@ import java.util.concurrent.Callable;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
+import org.lwjgl.util.vector.Vector4f;
 
 import audio.AudioEngine;
 import audio.AudioSrc;
@@ -647,7 +649,7 @@ public class PlayerWarshipVoyager extends Player {
 		@Override
 		public void whileHolding(IButton button) {
 			if (shieldsOn && SHIELD + 100 <= FULL_SHIELDS) {
-				energy -= 500;
+				ENERGY -= 500;
 				SHIELD += 100;
 			}
 		}
@@ -1136,11 +1138,7 @@ public class PlayerWarshipVoyager extends Player {
 	
 	//BOOKMARK: TACTICAL VARS
 	
-	private float HEALTH = 12500;
-	private float SHIELD = 100000;
-	
-	private boolean shieldsOn = true;
-	
+	private static final float MAX_HEALTH = 12500;
 	private static final float FULL_SHIELDS = 100000;
 	
 	private float turretTimer = 0;
@@ -1173,14 +1171,6 @@ public class PlayerWarshipVoyager extends Player {
 	
 
 	private float autogunTimer = 0;
-	
-	private GUIText healthText;
-	private GUIText shieldsText;
-	private GUIText energyText;
-	
-	private GUIText coordsX = new GUIText("Loading...", 1.7f, TM.font, new Vector2f(0, 0), 0.5f, false);
-	private GUIText coordsY = new GUIText("Loading...", 1.7f, TM.font, new Vector2f(0, 0.05f), 0.5f, false);
-	private GUIText coordsZ = new GUIText("Loading...", 1.7f, TM.font, new Vector2f(0, 0.1f), 0.5f, false);
 	
 	private Particle retical;
 	
@@ -1241,7 +1231,6 @@ public class PlayerWarshipVoyager extends Player {
 	//BOOKMARK: OPS VARS
 	
 	private static final int MAX_ENERGY = 1000000;
-	private int energy = MAX_ENERGY;
 	
 	private float energyCounter = 0;
 	
@@ -1269,24 +1258,12 @@ public class PlayerWarshipVoyager extends Player {
 		
 		this.guis = guin;
 		initGUIS();
+		initsuper(MAX_HEALTH, FULL_SHIELDS, MAX_ENERGY);
 	}
 	
 	//UI STUFF*****************************************
 	
 	private void initGUIS() {
-		
-		healthText = new GUIText("Loading...", 1.7f, TM.font, new Vector2f(0.64f, 0.20f), 1, false);
-		healthText.setColour(1, 0, 0);
-		
-		shieldsText = new GUIText("Loading...", 1.7f, TM.font, new Vector2f(0.64f, 0.25f), 1, false);
-		shieldsText.setColour(0, 1, 0.75f);
-		
-		energyText = new GUIText("Loading...", 1.7f, TM.font, new Vector2f(0.64f, 0.15f), 1, false);
-		energyText.setColour(1, 0.75f, 0);
-		
-		coordsX.setColour(0, 1, 0);
-		coordsY.setColour(0, 1, 0);
-		coordsZ.setColour(0, 1, 0);
 		
 		rottext.setPosition(TM.coordtext(temp.getTexture().getPosition()));
 		rottext.getPosition().x -= 0.01f;
@@ -1417,7 +1394,7 @@ public class PlayerWarshipVoyager extends Player {
 		
 		shieldsText.setText(Integer.toString((int) (this.SHIELD / FULL_SHIELDS * 100)) + '%');
 		
-		energyText.setText(Integer.toString(this.energy));
+		energyText.setText(Integer.toString(this.ENERGY));
 		
 		coordsX.setText(Float.toString(super.getPosition().x));
 		coordsY.setText(Float.toString(super.getPosition().y));
@@ -1524,11 +1501,11 @@ public class PlayerWarshipVoyager extends Player {
 		asrc.setPosition(getPosition().x, getPosition().y, getPosition().z);
 		stingersrc.setPosition(getPosition().x, getPosition().y, getPosition().z);
 		
-		if (energy < 0) {
-			energy = 0;
+		if (ENERGY < 0) {
+			ENERGY = 0;
 		}
-		else if (energy > MAX_ENERGY) {
-			energy = MAX_ENERGY;
+		else if (ENERGY > MAX_ENERGY) {
+			ENERGY = MAX_ENERGY;
 		}
 		
 		if (!shieldsOn && SHIELD < FULL_SHIELDS) {
@@ -1542,23 +1519,23 @@ public class PlayerWarshipVoyager extends Player {
 		
 		energyCounter += DisplayManager.getFrameTime();
 		
-		if (energyCounter > 1 && energy < MAX_ENERGY) {
-			if (energy < MAX_ENERGY * 0.9) {
-				if (energy > MAX_ENERGY * 0.5) {
-					energy += 50;
+		if (energyCounter > 1 && ENERGY < MAX_ENERGY) {
+			if (ENERGY < MAX_ENERGY * 0.9) {
+				if (ENERGY > MAX_ENERGY * 0.5) {
+					ENERGY += 50;
 				}
-				else if (energy > MAX_ENERGY * 0.3) {
-					energy += 100;
+				else if (ENERGY > MAX_ENERGY * 0.3) {
+					ENERGY += 100;
 				}
-				else if (energy > MAX_ENERGY * 0.2f) {
-					energy += 150;
+				else if (ENERGY > MAX_ENERGY * 0.2f) {
+					ENERGY += 150;
 				}
 				else {
-					energy += 350;
+					ENERGY += 350;
 				}
 			}
 			else {
-				energy += 10;;
+				ENERGY += 10;;
 			}
 			energyCounter = 0;
 		}
@@ -1691,7 +1668,7 @@ public class PlayerWarshipVoyager extends Player {
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_A) || flagLeft) { 
 			flagLeft = false;
-			this.currentTurnSpeed = TURN_SPEED;
+			//this.currentTurnSpeed = TURN_SPEED;
 			if (this.getRotZ() > -45)
 				super.rotate(0, 0, -60 * DisplayManager.getFrameTime());
 		}
@@ -1828,7 +1805,7 @@ public class PlayerWarshipVoyager extends Player {
 		if (mainPhaserTimer > 0.005f) {
 			Vector3f playerPos = (super.getPosition());
 			
-			projectiles.add(new Bolt(privatePhaserTexture, new Vector3f((float) (playerPos.x + (Math.sin
+			/*projectiles.add(new Bolt(privatePhaserTexture, new Vector3f((float) (playerPos.x + (Math.sin
 					(Math.toRadians(super.getRotY() - 90)) / 1.35) + Math.sin
 					(Math.toRadians(super.getRotY())) * 35), playerPos.y + 20.9f, (float) (playerPos.z + (Math.cos
 							(Math.toRadians(super.getRotY() - 90)) / 1.35) + Math.cos
@@ -1843,8 +1820,20 @@ public class PlayerWarshipVoyager extends Player {
 					(Math.toRadians(super.getRotY())) * 35), playerPos.y + 22.35f, (float) (playerPos.z + (Math.cos
 							(Math.toRadians(super.getRotY() - 90)) * 5) + Math.cos
 							(Math.toRadians(super.getRotY())) * 35) ), super.getRotX(), super.getRotY(), 0, 1.5f, 1.5f, 8, 5, this.currentSpeed));
-		
-			energy -= 3;
+		*/
+			
+			Vector4f modelpos = new Vector4f(-0.75f, 20.9f, 50, 1);
+			
+			Matrix4f mat = SFMath.createTransformationMatrix(super.getPosition(),
+					super.getRotX(), super.getRotY(), super.getRotZ(), new Vector3f(1, 1, 1));
+			
+			Vector4f actpos = Matrix4f.transform(mat, modelpos, null);
+			
+			Vector3f down = new Vector3f(actpos.x, actpos.y, actpos.z);
+			
+			projectiles.add(Bolt.phaser(down, 75, super.getRotX(), super.getRotY(), 0, 0));
+			
+			ENERGY -= 3;
 			mainPhaserTimer = 0;
 		}
 	
@@ -1858,7 +1847,7 @@ public class PlayerWarshipVoyager extends Player {
 		projectiles.add(Torpedo.photonTorpedo(super.getPosition(), this.currentSpeed + 4500,
 				5, 11, 11, super.getRotY(), super.getRotX()));
 		
-		energy -= 80;
+		ENERGY -= 80;
 		
 	}
 	
@@ -1870,7 +1859,7 @@ public class PlayerWarshipVoyager extends Player {
 		projectiles.add(Torpedo.quantumTorpedo(super.getPosition(), this.currentSpeed + 4500,
 				5, 11, 11, super.getRotY(), super.getRotX()));
 		
-		energy -= 140;
+		ENERGY -= 140;
 				
 	}
 	
@@ -1880,7 +1869,7 @@ public class PlayerWarshipVoyager extends Player {
 				super.getRotX() + rng.nextFloat() * 2 - 1, super.getRotY() + rng.nextFloat() * 2 - 1, super.getRotZ(),
 				1.5f, 1.5f, 20, 300, mx, -my, mz, false));
 		
-		energy -= 100;
+		ENERGY -= 100;
 		
 	}
 	
@@ -1946,7 +1935,7 @@ public class PlayerWarshipVoyager extends Player {
 				-super.getRotX() - angle, super.getRotY() + 180, 0
 				, 1.5f, 1.5f, 20, 10, mx, my, mz, true));
 		
-		energy--;
+		ENERGY--;
 		
 	}
 	
@@ -1962,7 +1951,7 @@ public class PlayerWarshipVoyager extends Player {
 				-super.getRotX() - angle, super.getRotY() + 180, 0
 				, 1.5f, 1.5f, 20, 10, mx, my, mz, true));
 		
-		energy--;
+		ENERGY--;
 		
 	}
 	
@@ -1970,7 +1959,7 @@ public class PlayerWarshipVoyager extends Player {
 		
 		projectiles.add(Bolt.phaser(getPosition(), -0.5f, 21, 0, 10, super.getRotX(), super.getRotY() + 180, super.getRotZ(), this.currentSpeed));
 		
-		energy -= 1.5f;
+		ENERGY -= 1.5f;
 		
 	}
 	
@@ -1978,7 +1967,7 @@ public class PlayerWarshipVoyager extends Player {
 		
 		projectiles.add(Bolt.phaser(getPosition(), -0.5f, 6.1f, 45, 10, super.getRotX(), super.getRotY() + 180, super.getRotZ(), this.currentSpeed)); 
 		
-		energy -= 1.5f;
+		ENERGY -= 1.5f;
 		
 	}
 	
@@ -2103,7 +2092,7 @@ public class PlayerWarshipVoyager extends Player {
 				
 				AudioEngine.playTempSrc(TM.photonsnd, 150, super.getPosition().x, super.getPosition().y, super.getPosition().z);
 				
-				energy -= 100;
+				ENERGY -= 100;
 				autogunTimer = 0;
 			}
 			
@@ -2116,7 +2105,7 @@ public class PlayerWarshipVoyager extends Player {
 				
 				AudioEngine.playTempSrc(TM.photonsnd, 150, super.getPosition().x, super.getPosition().y, super.getPosition().z);
 				
-				energy -= 202.5f;
+				ENERGY -= 202.5f;
 				autogunTimer = 0;
 			}
 			break;
@@ -2157,7 +2146,7 @@ public class PlayerWarshipVoyager extends Player {
 		
 		case ONE_TORP:
 			projectiles.add(Torpedo.photonTorpedo(super.getPosition(), dx, dy, dz));
-			energy -= 40;
+			ENERGY -= 40;
 			break;
 			
 		case TWO_SHOT:
@@ -2168,7 +2157,7 @@ public class PlayerWarshipVoyager extends Player {
 			projectiles.add(new Torpedo(privateTorpedoTexture, 
 					new Vector3f(super.getPosition().x, super.getPosition().y + 10, super.getPosition().z),
 					0, 0, 0, 2, 2, 5, Torpedo.PT, dx, dy, dz));
-			energy -= 80;
+			ENERGY -= 80;
 			break;
 		
 		}
@@ -2189,7 +2178,7 @@ public class PlayerWarshipVoyager extends Player {
 				
 				turretTimer = 0;
 				turretToggle = false;
-				energy -= 40;
+				ENERGY -= 40;
 			}
 			break;
 			
@@ -2204,7 +2193,7 @@ public class PlayerWarshipVoyager extends Player {
 				
 				turretTimer = 0;
 				turretToggle = false;
-				energy -= 80;
+				ENERGY -= 80;
 			}
 			break;
 			
@@ -2212,7 +2201,7 @@ public class PlayerWarshipVoyager extends Player {
 			Vector3f rotations = SFMath.rotateToFaceVector(super.getPosition(), target);
 			projectiles.add(new Bolt(privatePhaserTexture, new Vector3f(super.getPosition().x, super.getPosition().y + 10, super.getPosition().z)
 					, -rotations.x, rotations.y, rotations.z, 1.5f, 1.5f, 10, 15, 0));
-			energy--;
+			ENERGY--;
 			
 			if (turretTimer > 0.5f || turretToggle) {
 				
@@ -2220,7 +2209,7 @@ public class PlayerWarshipVoyager extends Player {
 				
 				turretTimer = 0;
 				turretToggle = false;
-				energy -= 70;
+				ENERGY -= 70;
 			}
 			break;
 			
