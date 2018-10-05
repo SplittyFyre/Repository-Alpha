@@ -75,6 +75,7 @@ public class PlayerBirdOfPrey extends Player {
 		}
 	};
 	
+	@Override
 	public Enemy getTarget() {
 		return target;
 	}
@@ -547,6 +548,12 @@ public class PlayerBirdOfPrey extends Player {
 				super.getPosition().z + (TM.rng.nextFloat() - 0.5f) * 100000)
 		:
 			super.getPosition();
+		
+	}
+
+	@Override
+	protected void initWeapons() {
+		// FIXME Auto-generated method stub
 		
 	}
 

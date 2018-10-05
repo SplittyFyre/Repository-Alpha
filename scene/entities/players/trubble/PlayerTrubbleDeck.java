@@ -47,4 +47,10 @@ public class PlayerTrubbleDeck extends Player {
 		return super.getPosition();
 	}
 
+	@Override
+	protected void initWeapons() {
+		// FIXME Auto-generated method stub
+		
+	}
+
 }

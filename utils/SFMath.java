@@ -209,7 +209,6 @@ public class SFMath {
 		Vector3f front = new Vector3f();
 		Vector3f.sub(b, a, front);
 		//float xy = (float) Math.sqrt(dx * dx + dz * dz);
-		float hyp = SFMath.distance(destination, rotatingObjectPosition);
 		if (front.length() != 0)
 			front.normalise();
 		float requiredRotY = (float) Math.toDegrees(Math.atan2(front.x, front.z));

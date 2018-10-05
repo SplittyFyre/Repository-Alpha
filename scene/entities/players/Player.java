@@ -2,8 +2,10 @@ package scene.entities.players;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
+import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -18,12 +20,14 @@ import scene.entities.entityUtils.StatusText;
 import scene.entities.hostiles.Enemy;
 import scene.entities.projectiles.Projectile;
 import utils.RaysCast;
+import utils.SFMath;
 
 public abstract class Player extends Entity implements ITakeDamage {
 	
 	public abstract void update(RaysCast caster);
 	public abstract void choreCollisions(List<Enemy> enemies, RaysCast caster);
 	public abstract Vector3f getPlayerPos();
+	protected abstract void initWeapons();
 	
 	protected float HEALTH;
 	protected float SHIELD;
@@ -44,6 +48,8 @@ public abstract class Player extends Entity implements ITakeDamage {
 	protected GUIText coordsY = new GUIText("Loading...", 1.7f, TM.font, new Vector2f(0, 0.05f), 0.5f, false);
 	protected GUIText coordsZ = new GUIText("Loading...", 1.7f, TM.font, new Vector2f(0, 0.1f), 0.5f, false);
 	
+	protected float tracingX, tracingY, tracingZ, distMoved;
+	
 	public Camera camera;
 	
 	protected Enemy target;
@@ -54,11 +60,12 @@ public abstract class Player extends Entity implements ITakeDamage {
 	
 	public boolean cloaked = false;
 	
+	protected Matrix4f tmat;
+	
 	protected List<StatusText> statusQueue = new ArrayList<StatusText>();
-	
 	protected List<Projectile> projectiles = Collections.synchronizedList(new ArrayList<Projectile>());
-	
 	protected List<GUITexture> guis;
+	protected HashMap<String, Runnable> weapons = new HashMap<String, Runnable>();
 	
 	public Player(TexturedModel model, Vector3f position, float rotX, float rotY, float rotZ, float scale, List<GUITexture> guis) {
 		super(model, position, rotX, rotY, rotZ, scale);
@@ -85,7 +92,8 @@ public abstract class Player extends Entity implements ITakeDamage {
 	}
 	
 	protected void prerequisite() {
-		
+		tmat = SFMath.createTransformationMatrix(super.getPosition(),
+			super.getRotX(), super.getRotY(), super.getRotZ(), new Vector3f(1, 1, 1));
 	}
 	
 	public List<Projectile> getProjectiles() {

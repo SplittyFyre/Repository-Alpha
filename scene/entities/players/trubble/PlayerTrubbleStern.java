@@ -46,4 +46,10 @@ public class PlayerTrubbleStern extends Player {
 		return super.getPosition();
 	}
 
+	@Override
+	protected void initWeapons() {
+		// FIXME Auto-generated method stub
+		
+	}
+
 }

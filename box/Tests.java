@@ -1,38 +1,20 @@
 package box;
 
 import java.io.IOException;
-
-import audio.AudioEngine;
-import audio.AudioSrc;
+import java.util.HashMap;
 
 public class Tests {
 
 	public static void main(String[] args) throws IOException, InterruptedException {
 		
-		AudioEngine.init();
-		AudioEngine.setListenerData(0, 0, 0);
+		HashMap<Integer, String> map = new HashMap<>();
 		
-		int buffer = AudioEngine.loadSound("res/photon_torpedo.wav");
+		map.put(1, "ONE");
+		map.put(2, "TWO");
+		map.put(3, "THREE");
+		map.put(4, "FOUR");
 		
-		AudioSrc src = new AudioSrc();
-		src.setLooping(true);
-		src.play(buffer);
-		
-		float x = 8;
-		src.setPosition(x, 0, 2);
-		
-		char c = ' ';
-		while (c != 'q') {
-			
-			x -= 0.03f;
-			src.setPosition(x, 0, 2);
-			Thread.sleep(10);
-			
-		}
-		
-		src.delete(); 
-		
-		AudioEngine.cleanUp();
+		System.out.println(map.get(4));
 
 	}
 

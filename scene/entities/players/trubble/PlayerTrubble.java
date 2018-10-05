@@ -121,6 +121,7 @@ public class PlayerTrubble extends Player {
 	
 	private Particle retical;
 	
+	@Override
 	public Enemy getTarget() {
 		return target;
 	}
@@ -1210,6 +1211,12 @@ public class PlayerTrubble extends Player {
 				super.getPosition().z + SFMath.relativePosShiftZ(SFMath.SF_DIRECTION_AZIMUTH_LEFT, super.getRotY(), 250)
 				
 			);*/
+	}
+
+	@Override
+	protected void initWeapons() {
+		// FIXME Auto-generated method stub
+		
 	}
 
 }

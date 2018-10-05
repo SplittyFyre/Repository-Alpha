@@ -8,10 +8,8 @@ import java.util.concurrent.Callable;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
-import org.lwjgl.util.vector.Vector4f;
 
 import audio.AudioEngine;
 import audio.AudioSrc;
@@ -32,6 +30,7 @@ import renderEngine.models.TexturedModel;
 import renderEngine.textures.GUITexture;
 import renderEngine.textures.ModelTexture;
 import scene.entities.Entity;
+import scene.entities.entityUtils.ModelSys;
 import scene.entities.entityUtils.StatusText;
 import scene.entities.hostiles.Enemy;
 import scene.entities.projectiles.Bolt;
@@ -1132,7 +1131,6 @@ public class PlayerWarshipVoyager extends Player {
 	private float counterS = 1.25f;
 	private boolean flag = false;
 	private boolean flag2 = false;
-	private float mx, my, mz;
 	
 	Random rng = new Random();
 	
@@ -1199,6 +1197,10 @@ public class PlayerWarshipVoyager extends Player {
 		this.retical = null;
 	}
 	
+	private float leftPhaserTimer = 0;
+	private float centerPhaserTimer = 0;
+	private float rightPhaserTimer = 0;
+	
 	private float mainPhaserTimer = 0;
 	
 	//BOOKMARK: NAVIGATION VARS
@@ -1259,6 +1261,19 @@ public class PlayerWarshipVoyager extends Player {
 		this.guis = guin;
 		initGUIS();
 		initsuper(MAX_HEALTH, FULL_SHIELDS, MAX_ENERGY);
+	}
+	
+	@Override
+	protected void initWeapons() {
+
+		weapons.put("center_front_phaser", new Runnable() {
+			
+			@Override
+			public void run() {
+				fire_center_front_phaser();
+			}
+		});
+		
 	}
 	
 	//UI STUFF*****************************************
@@ -1478,6 +1493,8 @@ public class PlayerWarshipVoyager extends Player {
 	@Override
 	public void update(RaysCast caster) {
 		
+		prerequisite();
+		
 		if (this.target != null) {
 			
 			/*trmText.setText("Targeting Vessel at: "
@@ -1576,7 +1593,12 @@ public class PlayerWarshipVoyager extends Player {
 		//float dy = (float) (distanceMoved * Math.sin(Math.toRadians(super.getRotX())));
 		float dz = (float) (distanceMoved * Math.cos(Math.toRadians(super.getRotY()))) * l;
 		super.move(dx, -dy, dz);
-		this.mx += dx; this.mx /= 2; this.my += dy; this.my /= 2; this.mz += dz; this.mz /= 2;
+		
+		tracingX = dx;
+		tracingY = dy;
+		tracingZ = dz;
+		distMoved = distanceMoved;
+		
 		//super.move(0, upwardsSpeed * DisplayManager.getFrameTime(), 0);
 		this.setRotY(this.getRotY() % 360);
 		if (this.getRotY() < 0) {
@@ -1798,40 +1820,33 @@ public class PlayerWarshipVoyager extends Player {
 	
 	}
 	
+	private void fire_center_front_phaser() {
+		
+		centerPhaserTimer += DisplayManager.getFrameTime();
+		
+		if (centerPhaserTimer > 0.0075f) {
+			projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-0.75f, 20.9f, 50)),
+					20, super.getRotX(), super.getRotY(), 0, this.currentSpeed));
+			ENERGY--;
+			centerPhaserTimer = 0;
+		}
+		
+	}
+	
 	private void fireFrontPhasers() {
 		
 		mainPhaserTimer += DisplayManager.getFrameTime();
 		
-		if (mainPhaserTimer > 0.005f) {
-			Vector3f playerPos = (super.getPosition());
+		if (mainPhaserTimer > 0.0075f) {
 			
-			/*projectiles.add(new Bolt(privatePhaserTexture, new Vector3f((float) (playerPos.x + (Math.sin
-					(Math.toRadians(super.getRotY() - 90)) / 1.35) + Math.sin
-					(Math.toRadians(super.getRotY())) * 35), playerPos.y + 20.9f, (float) (playerPos.z + (Math.cos
-							(Math.toRadians(super.getRotY() - 90)) / 1.35) + Math.cos
-							(Math.toRadians(super.getRotY())) * 35)), super.getRotX(), super.getRotY(), 0, 1.5f, 1.5f, 8, 10, this.currentSpeed));
+			projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-5, 22.375f, 40 + distMoved)),
+					20, super.getRotX(), super.getRotY(), 0, this.currentSpeed));
 			
-			projectiles.add(new Bolt(privatePhaserTexture, new Vector3f((float) (playerPos.x + (Math.sin(Math.toRadians(super.getRotY() + 90)) * 4) + Math.sin
-					(Math.toRadians(super.getRotY())) * 35), playerPos.y + 22.35f, (float) (playerPos.z + (Math.cos
-							(Math.toRadians(super.getRotY() + 90)) * 4) + Math.cos
-							(Math.toRadians(super.getRotY())) * 35) ), super.getRotX(), super.getRotY(), 0, 1.5f, 1.5f, 8, 5, this.currentSpeed));
+			projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-0.75f, 20.9f, 54 + distMoved)),
+					20, super.getRotX(), super.getRotY(), 0, this.currentSpeed));
 			
-			projectiles.add(new Bolt(privatePhaserTexture, new Vector3f((float) (playerPos.x + (Math.sin(Math.toRadians(super.getRotY() - 90)) * 5) + Math.sin
-					(Math.toRadians(super.getRotY())) * 35), playerPos.y + 22.35f, (float) (playerPos.z + (Math.cos
-							(Math.toRadians(super.getRotY() - 90)) * 5) + Math.cos
-							(Math.toRadians(super.getRotY())) * 35) ), super.getRotX(), super.getRotY(), 0, 1.5f, 1.5f, 8, 5, this.currentSpeed));
-		*/
-			
-			Vector4f modelpos = new Vector4f(-0.75f, 20.9f, 50, 1);
-			
-			Matrix4f mat = SFMath.createTransformationMatrix(super.getPosition(),
-					super.getRotX(), super.getRotY(), super.getRotZ(), new Vector3f(1, 1, 1));
-			
-			Vector4f actpos = Matrix4f.transform(mat, modelpos, null);
-			
-			Vector3f down = new Vector3f(actpos.x, actpos.y, actpos.z);
-			
-			projectiles.add(Bolt.phaser(down, 75, super.getRotX(), super.getRotY(), super.getRotZ(), this.currentSpeed));
+			projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(4, 22.375f, 40 + distMoved)),
+					20, super.getRotX(), super.getRotY(), 0, this.currentSpeed));
 			
 			ENERGY -= 3;
 			mainPhaserTimer = 0;
@@ -1867,7 +1882,7 @@ public class PlayerWarshipVoyager extends Player {
 		
 		projectiles.add(new Bolt(privatePhaserTexture, new Vector3f(super.getPosition().x, super.getPosition().y + 10, super.getPosition().z), 
 				super.getRotX() + rng.nextFloat() * 2 - 1, super.getRotY() + rng.nextFloat() * 2 - 1, super.getRotZ(),
-				1.5f, 1.5f, 20, 300, mx, -my, mz, false));
+				1.5f, 1.5f, 20, 300, tracingX, -tracingY, tracingZ, false));
 		
 		ENERGY -= 100;
 		
@@ -1933,7 +1948,7 @@ public class PlayerWarshipVoyager extends Player {
 						super.getPosition().z + SFMath.relativePosShiftZ(SFMath.SF_DIRECTION_AZIMUTH_LEFT, super.getRotY(), 9.1f)
 						- SFMath.relativePosShiftZ(SFMath.SF_DIRECTION_AZIMUTH_NEUTRAL, super.getRotY(), 12)),
 				-super.getRotX() - angle, super.getRotY() + 180, 0
-				, 1.5f, 1.5f, 20, 10, mx, my, mz, true));
+				, 1.5f, 1.5f, 20, 10, tracingX, tracingY, tracingZ, true));
 		
 		ENERGY--;
 		
@@ -1949,7 +1964,7 @@ public class PlayerWarshipVoyager extends Player {
 						super.getPosition().z + SFMath.relativePosShiftZ(SFMath.SF_DIRECTION_AZIMUTH_RIGHT, super.getRotY(), 9.1f)
 						- SFMath.relativePosShiftZ(SFMath.SF_DIRECTION_AZIMUTH_NEUTRAL, super.getRotY(), 12)),
 				-super.getRotX() - angle, super.getRotY() + 180, 0
-				, 1.5f, 1.5f, 20, 10, mx, my, mz, true));
+				, 1.5f, 1.5f, 20, 10, tracingX, -tracingY, tracingZ, true));
 		
 		ENERGY--;
 		
@@ -1972,12 +1987,9 @@ public class PlayerWarshipVoyager extends Player {
 	}
 	
 	private void fireAllWeapons(RaysCast caster) {
-			
-		Vector3f ray = new Vector3f(caster.getCurrentRay());
-		Vector3f target = new Vector3f(caster.getPointOnRay(ray, 200));
-			
+					
 		if (Keyboard.isKeyDown(Keyboard.KEY_P))
-			fireSternEndPhaser();
+			fireFrontPhasers();
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_O) && counter < 0) {
 			fireSecondaryForwardPhotons();
