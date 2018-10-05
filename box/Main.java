@@ -396,7 +396,7 @@ public class Main {
 		GUIText grid = new GUIText("Loading...", 1.7f, TM.font, new Vector2f(0.1f, 0), 0.5f, false);
 		grid.setColour(1, 0, 0);
 		
-		FloatingOrigin origin = new FloatingOrigin(player, 200000);
+		FloatingOrigin.init(player, 200000);
 		
 		while (!Display.isCloseRequested()) {
 			//sun.setPosition(new Vector3f(random.nextFloat() * 100000, 5000, random.nextFloat() * 100000));
@@ -408,9 +408,9 @@ public class Main {
 			ParticleWatcher.update();
 			scene.shootProps();
 			
-			Vector3f trans = origin.update();
+			Vector3f trans = FloatingOrigin.update();
 			
-			grid.setText(origin.getGridX() + ", " + origin.getGridZ());
+			grid.setText(FloatingOrigin.getGridX() + ", " + FloatingOrigin.getGridZ());
 			
 			/*if (Math.abs(SFMath.distance(player.getPosition(), new Vector3f(0, 0, 0))) > 1000) {
 				techicalOrigin = new Vector3f(player.getPosition());
