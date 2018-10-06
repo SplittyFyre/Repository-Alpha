@@ -59,14 +59,7 @@ public class BorgVessel extends Enemy {
 		
 		Vector3f vec = SFMath.rotateToFaceVector(super.getPosition(), new Vector3f(player.getPlayerPos().x, player.getPlayerPos().y + 5, player.getPlayerPos().z));
 		
-		float var = DisplayManager.getFrameTime() * 10;
-		float f = DisplayManager.getFrameTime() * 10000;
-		
 		float dist = SFMath.distance(player.getPlayerPos(), super.getPosition());
-		
-		float homingX = (float) (var * Math.sin(Math.toRadians(vec.y)));
-		float homingY = (float) (var * Math.sin(Math.toRadians(vec.x)));
-		float homingZ = (float) (var * Math.cos(Math.toRadians(vec.y)));
 		
 		if (dist > 2000) {
 			//super.move(homingX, homingY, homingZ);
@@ -99,7 +92,7 @@ public class BorgVessel extends Enemy {
 				if (!player.cloaked) {
 					Main.foeprojectiles.add(new HomingTorpedo(privateTorpedoTexture,
 							new Vector3f(super.getPosition().x, super.getPosition().y, super.getPosition().z), 
-							3, 3, 6.5f, 300, 3000, 15, player, 
+							3, 3, 6.5f, 300, 3100, 15, player, 
 							0, 20, 0, TM.smlexplosionParticleSystem));
 				}
 				
@@ -128,7 +121,7 @@ public class BorgVessel extends Enemy {
 			if (!player.cloaked && dist <= 3000 && counter1 > 0.5f) {
 				Main.foeprojectiles.add(new HomingTorpedo(privateTorpedoTexture,
 						new Vector3f(super.getPosition().x, super.getPosition().y + 400, super.getPosition().z), 
-						3, 3, 6.5f, 300, 3000, 15, player, 
+						3, 3, 6.5f, 300, 3100, 15, player, 
 						0, -5, 0, TM.smlexplosionParticleSystem));
 				counter1 = 0;
 			}

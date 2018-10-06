@@ -476,7 +476,7 @@ public class Main {
 					player.getPosition().x = 0;
 					player.getPosition().y = 0;
 					player.getPosition().z = 0;
-					System.out.println(home.getTerrain().getX() + ", " + home.getTerrain().getZ());
+					System.out.println(home.getPosition());
 				}
 				else if (Keyboard.isKeyDown(Keyboard.KEY_4)) {
 					player.setRotY(180);
