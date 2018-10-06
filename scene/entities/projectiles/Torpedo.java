@@ -156,6 +156,40 @@ public class Torpedo extends Projectile {
 				);
 	}
 	
+	public static Torpedo photonTorpedo(float speed, float rotY, float rotX, Vector3f position) {
+		
+		float move = DisplayManager.getFrameTime() * speed;
+		
+		AudioEngine.playTempSrc(TM.photonsnd, 100, position.x, position.y, position.z);
+		
+		return new Torpedo(TM.photonTorpedo, new Vector3f(position),
+				0, 0, 0, 2, 2, 5, PT, 
+				
+				(float) ((float) Math.sin(Math.toRadians(rotY)) * move * Math.cos(Math.toRadians(rotX)))
+				,
+				(float) Math.sin(Math.toRadians(-rotX)) * move
+				,
+				(float) ((float) Math.cos(Math.toRadians(rotY)) * move * Math.cos(Math.toRadians(rotX)))
+				);
+	}
+	
+	public static Torpedo quantumTorpedo(float speed, float rotY, float rotX, Vector3f position) {
+		
+		float move = DisplayManager.getFrameTime() * speed;
+		
+		AudioEngine.playTempSrc(TM.quantumsnd, 100, position.x, position.y, position.z);
+		
+		return new Torpedo(TM.quantumTorpedo, new Vector3f(position),
+				0, 0, 0, 2, 2, 5, QT, 
+				
+				(float) ((float) Math.sin(Math.toRadians(rotY)) * move * Math.cos(Math.toRadians(rotX)))
+				,
+				(float) Math.sin(Math.toRadians(-rotX)) * move
+				,
+				(float) ((float) Math.cos(Math.toRadians(rotY)) * move * Math.cos(Math.toRadians(rotX)))
+				);
+	}
+	
 	public static Torpedo photonTorpedo(float damage, Vector3f position, float speed, 
 			float magSide, float magHeight, float magFront, float rotY, float rotX) {
 		

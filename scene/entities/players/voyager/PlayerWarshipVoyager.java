@@ -1,4 +1,4 @@
-package scene.entities.players;
+package scene.entities.players.voyager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +33,7 @@ import scene.entities.Entity;
 import scene.entities.entityUtils.ModelSys;
 import scene.entities.entityUtils.StatusText;
 import scene.entities.hostiles.Enemy;
+import scene.entities.players.Player;
 import scene.entities.projectiles.Bolt;
 import scene.entities.projectiles.HomingTorpedo;
 import scene.entities.projectiles.Projectile;
@@ -48,14 +49,14 @@ public class PlayerWarshipVoyager extends Player {
 	private Vector2f schmpos = Vector2f.add(panelpos, new Vector2f(-0.2455f, 0), null);
 	//schmpos = [0.4045, -0.3f]
 	
-	private GUITexture gui_panel = new GUITexture(Loader.loadTexture("LCARSpanel"), panelpos, new Vector2f(0.35f, 0.7f));;
-	private GUITexture schematic = new GUITexture(Loader.loadTexture("schematic1"), schmpos, new Vector2f(0.233f, 0.466f));;
+	private GUITexture gui_panel = new GUITexture(Loader.loadTexture("LCARSpanel"), panelpos, new Vector2f(0.35f, 0.7f));
+	private GUITexture schematic = new GUITexture(Loader.loadTexture("schematic1"), schmpos, new Vector2f(0.233f, 0.466f));
 	
-	private List<IGUI> tacticalElements = new ArrayList<IGUI>();
-	private List<IGUI> opsElements = new ArrayList<IGUI>();
-	private List<IGUI> helmElements = new ArrayList<IGUI>();
-	
-	private List<IGUI> miscElements = new ArrayList<IGUI>();
+	//package visibility
+	List<IGUI> tacticalElements = new ArrayList<IGUI>();
+	List<IGUI> opsElements = new ArrayList<IGUI>();
+	List<IGUI> helmElements = new ArrayList<IGUI>();
+	List<IGUI> miscElements = new ArrayList<IGUI>();
 	
 	private static final String tag = "HMCS Voyager";
 	private GUIText trmText = new GUIText(tag, 1, TM.font, new Vector2f(0.75f, 0.3f), 0.25f, true);
@@ -64,37 +65,11 @@ public class PlayerWarshipVoyager extends Player {
 	
 	private SFAbstractButton viewScreenViewAft;
 	//private SFAbstractButton viewScreenViewMap;
+	
+	VoyagerGUISys pacman = new VoyagerGUISys(this);
 
 	private int a1 = Loader.loadTexture("voyphaserdiag2");
 	private int b1 = Loader.loadTexture("voyphaserdiagactive");
-	//BOOKMARK front phaser shoot button 
-	private SFAbstractButton phaserbutton = new SFAbstractButton(tacticalElements, "voyphaserdiag2", schematic.getPosition(), new Vector2f(-0.0045f, 0.375f), TM.sqr8) {
-		
-		@Override
-		public void whileHovering(IButton button) {
-	
-		}
-		
-		@Override
-		public void onStopHover(IButton button) {
-			this.getTexture().setTexture(a1);
-		}
-		
-		@Override
-		public void onStartHover(IButton button) {
-			this.getTexture().setTexture(b1);
-		}
-		
-		@Override
-		public void onClick(IButton button) {
-			
-		}
-
-		@Override
-		public void whileHolding(IButton button) {
-			fireFrontPhasers();
-		}
-	};
 	
 	private int a2 = Loader.loadTexture("guisys");
 	private int b2 = Loader.loadTexture("guisysfilled");
@@ -127,7 +102,7 @@ public class PlayerWarshipVoyager extends Player {
 		
 		@Override
 		public void onClick(IButton button) {
-			fireSecondaryForwardPhotons();
+			fireForwardPhotons();
 		}
 	};
 	
@@ -1820,12 +1795,12 @@ public class PlayerWarshipVoyager extends Player {
 	
 	}
 	
-	private void fire_center_front_phaser() {
+	void fire_port_front_phaser() {
 		
 		centerPhaserTimer += DisplayManager.getFrameTime();
 		
 		if (centerPhaserTimer > 0.0075f) {
-			projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-0.75f, 20.9f, 50)),
+			projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-5, 22.375f, 40 + distMoved)),
 					20, super.getRotX(), super.getRotY(), 0, this.currentSpeed));
 			ENERGY--;
 			centerPhaserTimer = 0;
@@ -1833,7 +1808,33 @@ public class PlayerWarshipVoyager extends Player {
 		
 	}
 	
-	private void fireFrontPhasers() {
+	void fire_center_front_phaser() {
+		
+		centerPhaserTimer += DisplayManager.getFrameTime();
+		
+		if (centerPhaserTimer > 0.0075f) {
+			projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-0.75f, 20.9f, 54 + distMoved)),
+					20, super.getRotX(), super.getRotY(), 0, this.currentSpeed));
+			ENERGY--;
+			centerPhaserTimer = 0;
+		}
+		
+	}
+	
+	void fire_starb_front_phaser() {
+		
+		centerPhaserTimer += DisplayManager.getFrameTime();
+		
+		if (centerPhaserTimer > 0.0075f) {
+			projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(4, 22.375f, 40 + distMoved)),
+					20, super.getRotX(), super.getRotY(), 0, this.currentSpeed));
+			ENERGY--;
+			centerPhaserTimer = 0;
+		}
+		
+	}
+	
+	void fireFrontPhasers() {
 		
 		mainPhaserTimer += DisplayManager.getFrameTime();
 		
@@ -1854,28 +1855,38 @@ public class PlayerWarshipVoyager extends Player {
 	
 	}
 	
-	private void fireSecondaryForwardPhotons() {
-		
-		projectiles.add(Torpedo.photonTorpedo(super.getPosition(), this.currentSpeed + 4500,
-				-5, 11, 11, super.getRotY(), super.getRotX()));
-		
-		projectiles.add(Torpedo.photonTorpedo(super.getPosition(), this.currentSpeed + 4500,
-				5, 11, 11, super.getRotY(), super.getRotX()));
-		
-		ENERGY -= 80;
-		
+	private void fire_port_forward_photon() {
+		projectiles.add(Torpedo.photonTorpedo(this.currentSpeed + 4500, super.getRotY(), super.getRotX(), 
+				ModelSys.pos(super.tmat, new Vector3f(5, 11, 11))));
+		ENERGY -= 40;
+	}
+	
+	private void fire_starb_forward_photon() {
+		projectiles.add(Torpedo.photonTorpedo(this.currentSpeed + 4500, super.getRotY(), super.getRotX(), 
+				ModelSys.pos(super.tmat, new Vector3f(-5, 11, 11))));
+		ENERGY -= 40;
+	}
+	
+	private void fireForwardPhotons() {
+		fire_port_forward_photon();
+		fire_starb_forward_photon();
+	}
+	
+	private void fire_port_forward_quantum() {
+		projectiles.add(Torpedo.quantumTorpedo(this.currentSpeed + 4500, super.getRotY(), super.getRotX(), 
+				ModelSys.pos(super.tmat, new Vector3f(5, 11, 11))));
+		ENERGY -= 70;
+	}
+	
+	private void fire_starb_forward_quantum() {
+		projectiles.add(Torpedo.quantumTorpedo(this.currentSpeed + 4500, super.getRotY(), super.getRotX(), 
+				ModelSys.pos(super.tmat, new Vector3f(-5, 11, 11))));
+		ENERGY -= 70;
 	}
 	
 	private void fireSecondaryForwardQuantums() {
-		
-		projectiles.add(Torpedo.quantumTorpedo(super.getPosition(), this.currentSpeed + 4500,
-				-5, 11, 11, super.getRotY(), super.getRotX()));
-		
-		projectiles.add(Torpedo.quantumTorpedo(super.getPosition(), this.currentSpeed + 4500,
-				5, 11, 11, super.getRotY(), super.getRotX()));
-		
-		ENERGY -= 140;
-				
+		fire_port_forward_quantum();
+		fire_starb_forward_quantum();
 	}
 	
 	private void firePhaserSpray() {
@@ -1992,7 +2003,7 @@ public class PlayerWarshipVoyager extends Player {
 			fireFrontPhasers();
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_O) && counter < 0) {
-			fireSecondaryForwardPhotons();
+			fireForwardPhotons();
 			counter = 2;
 		}
 		
@@ -2008,7 +2019,7 @@ public class PlayerWarshipVoyager extends Player {
 		if (flag) {
 			if (counterS >= 1.25f) {
 				counterS = 1.25f;
-				fireSecondaryForwardPhotons();
+				fireForwardPhotons();
 			}
 			
 			if (SFMath.nIsWithin(counterS, 0, 1)) {
