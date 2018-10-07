@@ -56,10 +56,10 @@ public class VoyagerGUISys {
 	SFAbstractButton buttonPhaserSpray;
 	SFAbstractButton buttonPortArrays1;
 	SFAbstractButton buttonPortArrays2;
-	SFAbstractButton buttonPortDorsalArrays;
+	SFAbstractButton buttonBackPortArrays;
 	SFAbstractButton buttonStarbArrays1;
 	SFAbstractButton buttonStarbArrays2;
-	SFAbstractButton buttonStarbDorsalArrays;
+	SFAbstractButton buttonBackStarbArrays;
 	SFAbstractButton toggleshields;
 	SFAbstractButton buttonBackMountedPhaser;
 	SFAbstractButton buttonBackEndPhaser;
@@ -468,7 +468,7 @@ public class VoyagerGUISys {
 			}
 		};
 		
-		buttonPortDorsalArrays = new SFAbstractButton(tacticalElements, "sqgui", schmpos, new Vector2f(-0.055f, 0.05f), varl) {
+		buttonBackPortArrays = new SFAbstractButton(tacticalElements, "sqgui", schmpos, new Vector2f(-0.055f, 0.05f), varl) {
 			
 			@Override
 			public void whileHovering(IButton button) {
@@ -478,7 +478,7 @@ public class VoyagerGUISys {
 			@Override
 			public void whileHolding(IButton button) {
 				//fireDorsalPortArrays(portslider.getSliderValue() * 22.5f); 
-				player.fireDorsalPortArrays(90);
+				player.fireBackPortArrays(90);
 			}
 			
 			@Override
@@ -554,7 +554,7 @@ public class VoyagerGUISys {
 			}
 		};
 		
-		buttonStarbDorsalArrays = new SFAbstractButton(tacticalElements, "sqgui", schmpos, new Vector2f(0.0455f, 0.05f), varl) {
+		buttonBackStarbArrays = new SFAbstractButton(tacticalElements, "sqgui", schmpos, new Vector2f(0.0455f, 0.05f), varl) {
 			
 			@Override
 			public void whileHovering(IButton button) {
@@ -564,7 +564,7 @@ public class VoyagerGUISys {
 			@Override
 			public void whileHolding(IButton button) {
 				//fireDorsalStarbArrays(starslider.getSliderValue() * 22.5f);
-				player.fireDorsalStarbArrays(90);
+				player.fireBackStarbArrays(90);
 			}
 			
 			@Override

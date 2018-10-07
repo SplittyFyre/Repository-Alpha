@@ -1518,11 +1518,13 @@ public class PlayerWarshipVoyager extends Player {
 		Vector3f rots;
 		Vector3f firing;
 		
+		float rough = SFMath.rotateToFaceVector(ModelSys.pos(tmat, new Vector3f(9, 20, 57.5f)), this.target.getPosition()).y;
+		
 		if (mode) {
-			firing = SFMath.vecShifts(super.getRotY(), getPosition(), -9, 20, 57.5f);
+			firing = ModelSys.pos(SFMath.createTransformationMatrix(getPosition(), super.getRotX(), rough, super.getRotZ(), 1), new Vector3f(9, 20, 57.5f));
 		}
 		else {
-			firing = SFMath.vecShifts(super.getRotY(), getPosition(), -10, 20, 45);
+			firing = ModelSys.pos(super.tmat, new Vector3f(10, 20, 45));
 		}
 		
 		if (this.target == null) {
@@ -1544,10 +1546,10 @@ public class PlayerWarshipVoyager extends Player {
 		Vector3f firing;
 		
 		if (mode) {
-			firing = SFMath.vecShifts(super.getRotY(), getPosition(), 9, 20, 57.5f);
+			firing = ModelSys.pos(super.tmat, new Vector3f(-9, 20, 57.5f));
 		}
 		else {
-			firing = SFMath.vecShifts(super.getRotY(), getPosition(), 10, 20, 45);
+			firing = ModelSys.pos(super.tmat, new Vector3f(-10, 20, 45));
 		}
 		
 		if (this.target == null) {
@@ -1563,7 +1565,7 @@ public class PlayerWarshipVoyager extends Player {
 		
 	}
 	
-	void fireDorsalPortArrays(float angle) {
+	void fireBackPortArrays(float angle) {
 		
 		projectiles.add(new Bolt(privatePhaserTexture, 
 				new Vector3f(super.getPosition().x + 
@@ -1579,7 +1581,7 @@ public class PlayerWarshipVoyager extends Player {
 		
 	}
 	
-	void fireDorsalStarbArrays(float angle) {
+	void fireBackStarbArrays(float angle) {
 		
 		projectiles.add(new Bolt(privatePhaserTexture, 
 				new Vector3f(super.getPosition().x + 
@@ -1597,7 +1599,8 @@ public class PlayerWarshipVoyager extends Player {
 	
 	void fireBackMountedPhaser() {
 		
-		projectiles.add(Bolt.phaser(getPosition(), -0.5f, 21, 0, 10, super.getRotX(), super.getRotY() + 180, super.getRotZ(), this.currentSpeed));
+		projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-0.5f, 21, -21)),
+				10, -super.getRotX(), super.getRotY() + 180, super.getRotZ(), this.currentSpeed));
 		
 		ENERGY -= 1.5f;
 		
@@ -1605,7 +1608,8 @@ public class PlayerWarshipVoyager extends Player {
 	
 	void fireBackEndPhaser() {
 		
-		projectiles.add(Bolt.phaser(getPosition(), -0.5f, 6.1f, 45, 10, super.getRotX(), super.getRotY() + 180, super.getRotZ(), this.currentSpeed)); 
+		projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-0.5f, 6.1f, -57)),
+				10, -super.getRotX(), super.getRotY() + 180, super.getRotZ(), this.currentSpeed)); 
 		
 		ENERGY -= 1.5f;
 		
@@ -1651,7 +1655,7 @@ public class PlayerWarshipVoyager extends Player {
 		counter -= DisplayManager.getFrameTime();
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_G)) {
-			fireDorsalPortArrays(0);
+			fireBackPortArrays(0);
 		}
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_Z) && !flag2) {
