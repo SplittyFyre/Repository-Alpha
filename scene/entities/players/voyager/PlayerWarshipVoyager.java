@@ -45,8 +45,8 @@ import utils.SFMath;
 
 public class PlayerWarshipVoyager extends Player {
 	
-	private Vector2f panelpos = new Vector2f(0.65f, -0.3f);
-	private Vector2f schmpos = Vector2f.add(panelpos, new Vector2f(-0.2455f, 0), null);
+	static Vector2f panelpos = new Vector2f(0.65f, -0.3f);
+	static Vector2f schmpos = Vector2f.add(panelpos, new Vector2f(-0.2455f, 0), null);
 	//schmpos = [0.4045, -0.3f]
 	
 	private GUITexture gui_panel = new GUITexture(Loader.loadTexture("LCARSpanel"), panelpos, new Vector2f(0.35f, 0.7f));
@@ -70,380 +70,6 @@ public class PlayerWarshipVoyager extends Player {
 
 	private int a1 = Loader.loadTexture("voyphaserdiag2");
 	private int b1 = Loader.loadTexture("voyphaserdiagactive");
-	
-	private int a2 = Loader.loadTexture("guisys");
-	private int b2 = Loader.loadTexture("guisysfilled");
-	//BOOKMARK front double photon shots
-	private SFAbstractButton frontphotonbutton = new SFAbstractButton(tacticalElements, "guisys", schmpos, new Vector2f(-0.0545f, 0.25f), TM.sqr8) {
-		
-		@Override
-		public void whileHovering(IButton button) {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		@Override
-		public void whileHolding(IButton button) {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		@Override
-		public void onStopHover(IButton button) {
-			this.getTexture().setTexture(a2);
-			
-		}
-		
-		@Override
-		public void onStartHover(IButton button) {
-			this.getTexture().setTexture(b2);
-			
-		}
-		
-		@Override
-		public void onClick(IButton button) {
-			fireForwardPhotons();
-		}
-	};
-	
-	//BOOKMARK front double quantum shots
-	private SFAbstractButton frontquantumbutton = new SFAbstractButton(tacticalElements, "guisys", schmpos, new Vector2f(0.0455f, 0.25f), TM.sqr8) {
-		
-		@Override
-		public void whileHovering(IButton button) {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		@Override
-		public void whileHolding(IButton button) {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		@Override
-		public void onStopHover(IButton button) {
-			this.getTexture().setTexture(a2);
-			
-		}
-		
-		@Override
-		public void onStartHover(IButton button) {
-			this.getTexture().setTexture(b2);
-			
-		}
-		
-		@Override
-		public void onClick(IButton button) {
-			fireSecondaryForwardQuantums();
-		}
-	};
-	
-	private int a3 = Loader.loadTexture("subsec");
-	private int b3 = Loader.loadTexture("subsecfilled");
-	//BOOKMARK phaser spray
-	private SFAbstractButton spraybutton = new SFAbstractButton(tacticalElements, "subsec", schmpos, new Vector2f(-0.0045f, 0.175f), TM.sqr4) {
-		
-		@Override
-		public void whileHovering(IButton button) {
-			
-		}
-		
-		@Override
-		public void whileHolding(IButton button) {
-			firePhaserSpray();
-		}
-		
-		@Override
-		public void onStopHover(IButton button) {
-			this.getTexture().setTexture(a3);
-		}
-		
-		@Override
-		public void onStartHover(IButton button) {
-			this.getTexture().setTexture(b3);
-		}
-		
-		@Override
-		public void onClick(IButton button) {
-			
-		}
-	};
-	
-	private int a4 = Loader.loadTexture("sqgui");
-	private int b4 = Loader.loadTexture("sqguifilled");
-	private Vector2f varl = new Vector2f(0.03f / TM.GUI_SCALE_DIV, 0.02f);
-	//BOOKMARK shoot port arrays
-	private SFAbstractButton portarray1 = new SFAbstractButton(tacticalElements, "sqgui", schmpos, new Vector2f(-0.055f, 0.15f), varl) {
-		
-		@Override
-		public void whileHovering(IButton button) {
-			
-		}
-		
-		@Override
-		public void whileHolding(IButton button) {
-			firePortArrays(true);
-		}
-		
-		@Override
-		public void onStopHover(IButton button) {
-			this.getTexture().setTexture(a4);
-		}
-		
-		@Override
-		public void onStartHover(IButton button) {
-			this.getTexture().setTexture(b4);
-		}
-		
-		@Override
-		public void onClick(IButton button) {
-			
-		}
-	};
-	
-	private SFAbstractButton portarray2 = new SFAbstractButton(tacticalElements, "sqgui", schmpos, new Vector2f(-0.055f, 0.1f), varl) {
-		
-		@Override
-		public void whileHovering(IButton button) {
-			
-		}
-		
-		@Override
-		public void whileHolding(IButton button) {
-			firePortArrays(false); 
-		}
-		
-		@Override
-		public void onStopHover(IButton button) {
-			this.getTexture().setTexture(a4);
-		}
-		
-		@Override
-		public void onStartHover(IButton button) {
-			this.getTexture().setTexture(b4);
-		}
-		
-		@Override
-		public void onClick(IButton button) {
-			
-		}
-	};
-	
-	private SFAbstractButton portdorsalbuttonvar = new SFAbstractButton(tacticalElements, "sqgui", schmpos, new Vector2f(-0.055f, 0.05f), varl) {
-		
-		@Override
-		public void whileHovering(IButton button) {
-			
-		}
-		
-		@Override
-		public void whileHolding(IButton button) {
-			fireDorsalPortArrays(portslider.getSliderValue() * 22.5f); 
-		}
-		
-		@Override
-		public void onStopHover(IButton button) {
-			this.getTexture().setTexture(a4);
-		}
-		
-		@Override
-		public void onStartHover(IButton button) {
-			this.getTexture().setTexture(b4);
-		}
-		
-		@Override
-		public void onClick(IButton button) {
-			 
-		}
-	};
-	
-	//BOOKMARK fire starboard arrays
-	private SFAbstractButton stararray1 = new SFAbstractButton(tacticalElements, "sqgui", schmpos, new Vector2f(0.0455f, 0.15f), varl) {
-		
-		@Override
-		public void whileHovering(IButton button) {
-			
-		}
-		
-		@Override
-		public void whileHolding(IButton button) {
-			fireStarbArrays(true);
-		}
-		
-		@Override
-		public void onStopHover(IButton button) {
-			this.getTexture().setTexture(a4);
-		}
-		
-		@Override
-		public void onStartHover(IButton button) {
-			this.getTexture().setTexture(b4);
-		}
-		
-		@Override
-		public void onClick(IButton button) {
-			
-		}
-	};
-	
-	private SFAbstractButton stararray2 = new SFAbstractButton(tacticalElements, "sqgui", schmpos, new Vector2f(0.0455f, 0.1f), varl) {
-		
-		@Override
-		public void whileHovering(IButton button) {
-			
-		}
-		
-		@Override
-		public void whileHolding(IButton button) {
-			fireStarbArrays(false); 
-		}
-		
-		@Override
-		public void onStopHover(IButton button) {
-			this.getTexture().setTexture(a4);
-		}
-		
-		@Override
-		public void onStartHover(IButton button) {
-			this.getTexture().setTexture(b4);
-		}
-		
-		@Override
-		public void onClick(IButton button) {
-			
-		}
-	};
-	
-	private SFAbstractButton stardorsalbuttonvar = new SFAbstractButton(tacticalElements, "sqgui", schmpos, new Vector2f(0.0455f, 0.05f), varl) {
-		
-		@Override
-		public void whileHovering(IButton button) {
-			
-		}
-		
-		@Override
-		public void whileHolding(IButton button) {
-			fireDorsalStarbArrays(starslider.getSliderValue() * 22.5f); 
-		}
-		
-		@Override
-		public void onStopHover(IButton button) {
-			this.getTexture().setTexture(a4);
-		}
-		
-		@Override
-		public void onStartHover(IButton button) {
-			this.getTexture().setTexture(b4);
-		}
-		
-		@Override
-		public void onClick(IButton button) {
-			
-		}
-	};
-	
-	private int a5 = Loader.loadTexture("shieldiconfilled");
-	private int b5 = Loader.loadTexture("shieldicon");
-	//BOOKMARK toggle shields
-	private SFAbstractButton toggleshields = new SFAbstractButton(tacticalElements, "shieldiconfilled", schmpos, new Vector2f(0.095f, 0.425f), TM.sqr4) {
-		
-		@Override
-		public void whileHovering(IButton button) {
-			
-		}
-		
-		@Override
-		public void whileHolding(IButton button) {
-			
-		}
-		
-		@Override
-		public void onStopHover(IButton button) {
-			
-		}
-		
-		@Override
-		public void onStartHover(IButton button) {
-			
-		}
-		
-		@Override
-		public void onClick(IButton button) {
-			shieldsOn = !shieldsOn;
-			if (shieldsOn) {
-				shieldsText.setColour(0, 1, 0.75f);
-				this.getTexture().setTexture(a5);
-			}
-			else {
-				shieldsText.setColour(0, 0, 1);
-				this.getTexture().setTexture(b5);
-			}
-		}
-	};
-	
-	private int a8 = Loader.loadTexture("rect");
-	private int b8 = Loader.loadTexture("rectfilled");
-	//BOOKMARK fire aft mounted phaser gun
-	private SFAbstractButton fireaftmountphaser = new SFAbstractButton(tacticalElements, "rect", schmpos, new Vector2f(-0.0045f, 0.075f), TM.sqr4) {
-
-		@Override
-		public void onClick(IButton button) {
-			
-		}
-
-		@Override
-		public void whileHolding(IButton button) {
-			fireMountedSternPhaser();
-		}
-
-		@Override
-		public void onStartHover(IButton button) {
-			this.getTexture().setTexture(b8);
-		}
-
-		@Override
-		public void onStopHover(IButton button) {
-			this.getTexture().setTexture(a8);
-		}
-
-		@Override
-		public void whileHovering(IButton button) {
-			
-		}
-		
-	};
-	
-	//BOOKMARK fire aft mounted phaser gun
-	private SFAbstractButton fireafttrailphaser = new SFAbstractButton(tacticalElements, "rect", schmpos, new Vector2f(-0.0045f, -0.34f), TM.sqr4) {
-
-		@Override
-		public void onClick(IButton button) {
-				
-		}
-
-		@Override
-		public void whileHolding(IButton button) {
-			fireSternEndPhaser();
-		}
-		
-		@Override
-		public void onStartHover(IButton button) {
-			this.getTexture().setTexture(b8);
-		}
-
-		@Override
-		public void onStopHover(IButton button) {
-			this.getTexture().setTexture(a8);
-		}
-
-		@Override
-		public void whileHovering(IButton button) {
-				
-		}
-			
-	};	
-	
 	//BOOKMARK fire turret to target
 	private SFAbstractButton fireturret = new SFAbstractButton(tacticalElements, "voyphaserdiag2", new Vector2f(hotbarx, hotbarheight + 0.075f), TM.sqr4) {
 		
@@ -492,13 +118,11 @@ public class PlayerWarshipVoyager extends Player {
 		
 		@Override
 		public void onStopHover(IButton button) {
-			// TODO Auto-generated method stub
 			
 		}
 		
 		@Override
 		public void onStartHover(IButton button) {
-			// TODO Auto-generated method stub
 			
 		}
 		
@@ -520,25 +144,21 @@ public class PlayerWarshipVoyager extends Player {
 		
 		@Override
 		public void whileHovering(IButton button) {
-			// TODO Auto-generated method stub
 			
 		}
 		
 		@Override
 		public void whileHolding(IButton button) {
-			// TODO Auto-generated method stub
 			
 		}
 		
 		@Override
 		public void onStopHover(IButton button) {
-			// TODO Auto-generated method stub
 			
 		}
 		
 		@Override
 		public void onStartHover(IButton button) {
-			// TODO Auto-generated method stub
 			
 		}
 		
@@ -1029,7 +649,7 @@ public class PlayerWarshipVoyager extends Player {
 	};
 	
 	//BOOKMARK break target
-	private SFAbstractButton breaktarget = new SFAbstractButton(tacticalElements, "break", schmpos, new Vector2f(0.13f, 0.325f), TM.sqr4) {
+	private SFAbstractButton breaktarget = new SFAbstractButton(tacticalElements, "break", schmpos, new Vector2f(0.13f, 0.525f), TM.sqr4) {
 		
 		@Override
 		public void whileHovering(IButton button) {
@@ -1333,11 +953,7 @@ public class PlayerWarshipVoyager extends Player {
 		turrethotbar = new GUITexture(Loader.loadTexture("hotbarptr"), new Vector2f(hotbarx, hotbarheight), new Vector2f(0.04f / 1.68f, 0.04f));
 		tacticalElements.add(turrethotbar);
 		
-		frontphotonbutton.getTexture().setRotation(-15);
-		frontquantumbutton.getTexture().setFlipped(true);
-		frontquantumbutton.getTexture().setRotation(-15);
 		
-		spraybutton.getTexture().setRotation(180);
 		
 		/*phaserbutton = new SFAbstractButton("phaserbutton", new Vector2f(0.4f, 0), new Vector2f(0.04f / 1.68f, 0.04f)) {
 			
@@ -1395,8 +1011,6 @@ public class PlayerWarshipVoyager extends Player {
 		if (shieldWarning && SHIELD > 0) {
 			shieldWarning = false;
 		}
-		
-		schematic.setPosition(Vector2f.add(gui_panel.getPosition(), new Vector2f(-0.2455f, 0), null));
 		
 		//trmText.setColour(0, 148f / 255f, 1);
 		//trmText.setColour(211f / 255f, 0.3f, 0.2666f);
@@ -1797,13 +1411,13 @@ public class PlayerWarshipVoyager extends Player {
 	
 	void fire_port_front_phaser() {
 		
-		centerPhaserTimer += DisplayManager.getFrameTime();
+		leftPhaserTimer += DisplayManager.getFrameTime();
 		
-		if (centerPhaserTimer > 0.0075f) {
-			projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-5, 22.375f, 40 + distMoved)),
+		if (leftPhaserTimer > 0.005f) {		
+			projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(4, 22.375f, 40 + distMoved)),
 					20, super.getRotX(), super.getRotY(), 0, this.currentSpeed));
 			ENERGY--;
-			centerPhaserTimer = 0;
+			leftPhaserTimer = 0;
 		}
 		
 	}
@@ -1812,7 +1426,7 @@ public class PlayerWarshipVoyager extends Player {
 		
 		centerPhaserTimer += DisplayManager.getFrameTime();
 		
-		if (centerPhaserTimer > 0.0075f) {
+		if (centerPhaserTimer > 0.005f) {
 			projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-0.75f, 20.9f, 54 + distMoved)),
 					20, super.getRotX(), super.getRotY(), 0, this.currentSpeed));
 			ENERGY--;
@@ -1823,13 +1437,13 @@ public class PlayerWarshipVoyager extends Player {
 	
 	void fire_starb_front_phaser() {
 		
-		centerPhaserTimer += DisplayManager.getFrameTime();
+		rightPhaserTimer += DisplayManager.getFrameTime();
 		
-		if (centerPhaserTimer > 0.0075f) {
-			projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(4, 22.375f, 40 + distMoved)),
+		if (rightPhaserTimer > 0.005f) {
+			projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-5, 22.375f, 40 + distMoved)),
 					20, super.getRotX(), super.getRotY(), 0, this.currentSpeed));
 			ENERGY--;
-			centerPhaserTimer = 0;
+			rightPhaserTimer = 0;
 		}
 		
 	}
@@ -1838,7 +1452,7 @@ public class PlayerWarshipVoyager extends Player {
 		
 		mainPhaserTimer += DisplayManager.getFrameTime();
 		
-		if (mainPhaserTimer > 0.0075f) {
+		if (mainPhaserTimer > 0.005f) {
 			
 			projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-5, 22.375f, 40 + distMoved)),
 					20, super.getRotX(), super.getRotY(), 0, this.currentSpeed));
@@ -1855,41 +1469,41 @@ public class PlayerWarshipVoyager extends Player {
 	
 	}
 	
-	private void fire_port_forward_photon() {
+	void fire_port_front_photon() {
 		projectiles.add(Torpedo.photonTorpedo(this.currentSpeed + 4500, super.getRotY(), super.getRotX(), 
 				ModelSys.pos(super.tmat, new Vector3f(5, 11, 11))));
 		ENERGY -= 40;
 	}
 	
-	private void fire_starb_forward_photon() {
+	void fire_starb_front_photon() {
 		projectiles.add(Torpedo.photonTorpedo(this.currentSpeed + 4500, super.getRotY(), super.getRotX(), 
 				ModelSys.pos(super.tmat, new Vector3f(-5, 11, 11))));
 		ENERGY -= 40;
 	}
 	
-	private void fireForwardPhotons() {
-		fire_port_forward_photon();
-		fire_starb_forward_photon();
+	void fireFrontPhotons() {
+		fire_port_front_photon();
+		fire_starb_front_photon();
 	}
 	
-	private void fire_port_forward_quantum() {
+	void fire_port_front_quantum() {
 		projectiles.add(Torpedo.quantumTorpedo(this.currentSpeed + 4500, super.getRotY(), super.getRotX(), 
 				ModelSys.pos(super.tmat, new Vector3f(5, 11, 11))));
 		ENERGY -= 70;
 	}
 	
-	private void fire_starb_forward_quantum() {
+	void fire_starb_front_quantum() {
 		projectiles.add(Torpedo.quantumTorpedo(this.currentSpeed + 4500, super.getRotY(), super.getRotX(), 
 				ModelSys.pos(super.tmat, new Vector3f(-5, 11, 11))));
 		ENERGY -= 70;
 	}
 	
-	private void fireSecondaryForwardQuantums() {
-		fire_port_forward_quantum();
-		fire_starb_forward_quantum();
+	void fireFrontQuantums() {
+		fire_port_front_quantum();
+		fire_starb_front_quantum();
 	}
 	
-	private void firePhaserSpray() {
+	void firePhaserSpray() {
 		
 		projectiles.add(new Bolt(privatePhaserTexture, new Vector3f(super.getPosition().x, super.getPosition().y + 10, super.getPosition().z), 
 				super.getRotX() + rng.nextFloat() * 2 - 1, super.getRotY() + rng.nextFloat() * 2 - 1, super.getRotZ(),
@@ -1899,7 +1513,7 @@ public class PlayerWarshipVoyager extends Player {
 		
 	}
 	
-	private void firePortArrays(boolean mode) {
+	void firePortArrays(boolean mode) {
 		
 		Vector3f rots;
 		Vector3f firing;
@@ -1924,7 +1538,7 @@ public class PlayerWarshipVoyager extends Player {
 		
 	}
 	
-	private void fireStarbArrays(boolean mode) {
+	void fireStarbArrays(boolean mode) {
 		
 		Vector3f rots;
 		Vector3f firing;
@@ -1949,7 +1563,7 @@ public class PlayerWarshipVoyager extends Player {
 		
 	}
 	
-	private void fireDorsalPortArrays(float angle) {
+	void fireDorsalPortArrays(float angle) {
 		
 		projectiles.add(new Bolt(privatePhaserTexture, 
 				new Vector3f(super.getPosition().x + 
@@ -1965,7 +1579,7 @@ public class PlayerWarshipVoyager extends Player {
 		
 	}
 	
-	private void fireDorsalStarbArrays(float angle) {
+	void fireDorsalStarbArrays(float angle) {
 		
 		projectiles.add(new Bolt(privatePhaserTexture, 
 				new Vector3f(super.getPosition().x + 
@@ -1981,7 +1595,7 @@ public class PlayerWarshipVoyager extends Player {
 		
 	}
 	
-	private void fireMountedSternPhaser() {
+	void fireBackMountedPhaser() {
 		
 		projectiles.add(Bolt.phaser(getPosition(), -0.5f, 21, 0, 10, super.getRotX(), super.getRotY() + 180, super.getRotZ(), this.currentSpeed));
 		
@@ -1989,7 +1603,7 @@ public class PlayerWarshipVoyager extends Player {
 		
 	}
 	
-	private void fireSternEndPhaser() {
+	void fireBackEndPhaser() {
 		
 		projectiles.add(Bolt.phaser(getPosition(), -0.5f, 6.1f, 45, 10, super.getRotX(), super.getRotY() + 180, super.getRotZ(), this.currentSpeed)); 
 		
@@ -2003,12 +1617,12 @@ public class PlayerWarshipVoyager extends Player {
 			fireFrontPhasers();
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_O) && counter < 0) {
-			fireForwardPhotons();
+			fireFrontPhotons();
 			counter = 2;
 		}
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_I) && counter < 0) {
-			fireSecondaryForwardQuantums();
+			fireFrontQuantums();
 			counter = 0.4f;
 		}
 		
@@ -2019,7 +1633,7 @@ public class PlayerWarshipVoyager extends Player {
 		if (flag) {
 			if (counterS >= 1.25f) {
 				counterS = 1.25f;
-				fireForwardPhotons();
+				fireFrontPhotons();
 			}
 			
 			if (SFMath.nIsWithin(counterS, 0, 1)) {
@@ -2027,7 +1641,7 @@ public class PlayerWarshipVoyager extends Player {
 			}
 			
 			if (counterS < 0) {
-				fireSecondaryForwardQuantums();
+				fireFrontQuantums();
 				counterS = 10;
 				flag = false;
 			}
@@ -2318,6 +1932,7 @@ public class PlayerWarshipVoyager extends Player {
 				else {
 					turretTimer = 0;
 					turretToggle = true;
+					Mouse.next();
 				}
 				
 			}
@@ -2366,9 +1981,21 @@ public class PlayerWarshipVoyager extends Player {
 		
 	}
 	
+	boolean checkShields() {
+		shieldsOn = !shieldsOn;
+		if (shieldsOn) {
+			shieldsText.setColour(0, 1, 0.75f);
+			return true;
+		}
+		else {
+			shieldsText.setColour(0, 0, 1);
+			return false;
+		}
+	}
+	
 	@Override
 	public Vector3f getPlayerPos() {
-		return super.getPosition();
+		return new Vector3f(super.getPosition().x, super.getPosition().y + 10, super.getPosition().z);
 		/*return new Vector3f(super.getPosition().x + (TM.rng.nextFloat() - 0.5f) * 100000,
 				super.getPosition().y + (TM.rng.nextFloat() - 0.5f) * 10000,
 				super.getPosition().z + (TM.rng.nextFloat() - 0.5f) * 100000);*/

@@ -78,6 +78,7 @@ public class TM {
 	
 	public static final float GUI_SCALE_DIV = 1.68f;
 	
+	public static Vector2f sqr2 = new Vector2f(0.02f / GUI_SCALE_DIV, 0.02f);
 	public static Vector2f sqr4 = new Vector2f(0.04f / GUI_SCALE_DIV, 0.04f);
 	public static Vector2f sqr8 = new Vector2f(0.08f / GUI_SCALE_DIV, 0.08f);
 	

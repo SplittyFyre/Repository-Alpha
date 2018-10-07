@@ -81,6 +81,7 @@ public class Torpedo extends Projectile {
 	
 	
 	public static Torpedo photonTorpedo(Vector3f position, float dx, float dy, float dz) {
+		AudioEngine.playTempSrc(TM.photonsnd, 100, position.x, position.y, position.z);
 		return new Torpedo(TM.photonTorpedo, new Vector3f(position), 0, 0, 0, 2, 2, 5, PT, dx, dy, dz, 10);
 	}
 	
