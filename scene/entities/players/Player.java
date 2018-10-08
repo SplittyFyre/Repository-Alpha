@@ -47,6 +47,7 @@ public abstract class Player extends Entity implements ITakeDamage {
 	protected GUIText coordsX = new GUIText("Loading...", 1.7f, TM.font, new Vector2f(0, 0), 0.5f, false);
 	protected GUIText coordsY = new GUIText("Loading...", 1.7f, TM.font, new Vector2f(0, 0.05f), 0.5f, false);
 	protected GUIText coordsZ = new GUIText("Loading...", 1.7f, TM.font, new Vector2f(0, 0.1f), 0.5f, false);
+	protected GUIText gridText = new GUIText("Loading...", 1.7f, TM.font, new Vector2f(0, 0.15f), 0.5f, false);
 	
 	protected float tracingX, tracingY, tracingZ, distMoved;
 	
@@ -88,6 +89,7 @@ public abstract class Player extends Entity implements ITakeDamage {
 		coordsX.setColour(0, 1, 0);
 		coordsY.setColour(0, 1, 0);
 		coordsZ.setColour(0, 1, 0);
+		gridText.setColour(1, 0, 0);
 		
 	}
 	

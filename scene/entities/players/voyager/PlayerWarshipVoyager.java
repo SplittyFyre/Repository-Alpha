@@ -40,6 +40,7 @@ import scene.entities.projectiles.Projectile;
 import scene.entities.projectiles.Torpedo;
 import scene.particles.Particle;
 import scene.particles.ParticleTexture;
+import utils.FloatingOrigin;
 import utils.RaysCast;
 import utils.SFMath;
 
@@ -348,34 +349,6 @@ public class PlayerWarshipVoyager extends Player {
 		@Override
 		public void sliderStartHover(ISlider slider) {
 				
-		}
-	};
-	
-	//BOOKMARK port phaser angle slider
-	private SFVerticalSlider portslider = new SFVerticalSlider(tacticalElements, 0.12f, -0.01f, 0, new Vector2f(0.325f, -0.345f), TM.sqr4, "knob", "tramp") {
-		
-		@Override
-		public void sliderStopHover(ISlider slider) {
-			
-		}
-		
-		@Override
-		public void sliderStartHover(ISlider slider) {
-			
-		}
-	};
-	
-	//BOOKMARK starboard phaser angle slider
-	private SFVerticalSlider starslider = new SFVerticalSlider(tacticalElements, 0.12f, -0.01f, 0, new Vector2f(0.48f, -0.345f), TM.sqr4, "knob", "tramp") {
-		
-		@Override
-		public void sliderStopHover(ISlider slider) {
-			
-		}
-		
-		@Override
-		public void sliderStartHover(ISlider slider) {
-			
 		}
 	};
 	
@@ -1005,6 +978,7 @@ public class PlayerWarshipVoyager extends Player {
 		coordsX.setText(Float.toString(super.getPosition().x));
 		coordsY.setText(Float.toString(super.getPosition().y));
 		coordsZ.setText(Float.toString(super.getPosition().z));
+		gridText.setText(FloatingOrigin.getGridX() + ", " + FloatingOrigin.getGridZ());
 		
 		rottext.setText(Float.toString(UPWARDS_ROT_CAP));
 		
@@ -1354,7 +1328,7 @@ public class PlayerWarshipVoyager extends Player {
 		}
 		
 		//Key ALT
-		if (Keyboard.isKeyDown(Keyboard.KEY_LMENU)) {
+		if (currentPanel == TACTICAL_PANEL && Keyboard.isKeyDown(Keyboard.KEY_LMENU)) {
 			int wheel = Mouse.getDWheel();
 			if (wheel < 0) {
 				turretFunc--;
@@ -1660,8 +1634,20 @@ public class PlayerWarshipVoyager extends Player {
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_Z) && !flag2) {
 			flag2 = true;
-			vec = SFMath.rotateToFaceVector(super.getPosition(), this.target != null ? this.target.getPosition() : new Vector3f(0, 0, 0));
-			alpha = (vec.y % 360) - super.getRotY();
+			
+			float size = FloatingOrigin.gridLen;
+			
+			Vector3f vec = SFMath.rotateToFaceVector(getPosition(), new Vector3f(0 - FloatingOrigin.getGridX() * size,
+					0, 0 - FloatingOrigin.getGridZ() * size));
+			
+			float rot = super.getRotY() - vec.y;
+			
+			if (Math.abs(rot) > 180) {
+				rot += (rot > 0 ? -360 : 360);
+			}
+			
+			vec.x = -vec.x;
+			alpha = -rot;
 		}
 		
 		if (Keyboard.isKeyDown(Keyboard.KEY_Y)) {

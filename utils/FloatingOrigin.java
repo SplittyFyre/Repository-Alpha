@@ -8,7 +8,7 @@ public class FloatingOrigin {
 	
 	private static Player player;
 	
-	private static float gridLen;
+	public static float gridLen;
 	private static float part;
 	
 	private static int gridX = 0;

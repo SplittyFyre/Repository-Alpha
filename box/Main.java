@@ -390,9 +390,6 @@ public class Main {
 		
 		GUIText version = new GUIText("Version 0.0.01", 0.65f, TM.font, new Vector2f(0, 0.9775f), 0.5f, false);
 		version.setColour(1, 1, 1);
-				
-		GUIText grid = new GUIText("Loading...", 1.7f, TM.font, new Vector2f(0.1f, 0), 0.5f, false);
-		grid.setColour(1, 0, 0);
 		
 		FloatingOrigin.init(player, 200000);
 		
@@ -407,8 +404,6 @@ public class Main {
 			scene.shootProps();
 			
 			Vector3f trans = FloatingOrigin.update();
-			
-			grid.setText(FloatingOrigin.getGridX() + ", " + FloatingOrigin.getGridZ());
 			
 			/*if (Math.abs(SFMath.distance(player.getPosition(), new Vector3f(0, 0, 0))) > 1000) {
 				techicalOrigin = new Vector3f(player.getPosition());

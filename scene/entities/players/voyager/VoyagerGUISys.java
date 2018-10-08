@@ -8,7 +8,9 @@ import box.TM;
 import renderEngine.Loader;
 import renderEngine.guis.IButton;
 import renderEngine.guis.IGUI;
+import renderEngine.guis.ISlider;
 import renderEngine.guis.SFAbstractButton;
+import renderEngine.guis.SFVerticalSlider;
 import renderEngine.textures.GUITexture;
 
 public class VoyagerGUISys {
@@ -60,6 +62,10 @@ public class VoyagerGUISys {
 	SFAbstractButton buttonStarbArrays1;
 	SFAbstractButton buttonStarbArrays2;
 	SFAbstractButton buttonBackStarbArrays;
+	
+	SFVerticalSlider sliderBackPortArrays;
+	SFVerticalSlider sliderBackStarbArrays;
+	
 	SFAbstractButton toggleshields;
 	SFAbstractButton buttonBackMountedPhaser;
 	SFAbstractButton buttonBackEndPhaser;
@@ -477,8 +483,7 @@ public class VoyagerGUISys {
 			
 			@Override
 			public void whileHolding(IButton button) {
-				//fireDorsalPortArrays(portslider.getSliderValue() * 22.5f); 
-				player.fireBackPortArrays(90);
+				player.fireBackPortArrays(sliderBackPortArrays.getSliderValue() * 22.5f);
 			}
 			
 			@Override
@@ -563,8 +568,7 @@ public class VoyagerGUISys {
 			
 			@Override
 			public void whileHolding(IButton button) {
-				//fireDorsalStarbArrays(starslider.getSliderValue() * 22.5f);
-				player.fireBackStarbArrays(90);
+				player.fireBackStarbArrays(sliderBackStarbArrays.getSliderValue() * 22.5f);
 			}
 			
 			@Override
@@ -579,6 +583,34 @@ public class VoyagerGUISys {
 			
 			@Override
 			public void onClick(IButton button) {
+				
+			}
+		};
+		
+		//BOOKMARK sliders for back array angles
+		sliderBackPortArrays = new SFVerticalSlider(tacticalElements, 0.12f, -0.01f, 0, new Vector2f(0.325f, -0.345f), TM.sqr4, "knob", "tramp") {
+			
+			@Override
+			public void sliderStopHover(ISlider slider) {
+				
+			}
+			
+			@Override
+			public void sliderStartHover(ISlider slider) {
+				
+			}
+		};
+		
+		//BOOKMARK starboard phaser angle slider
+		sliderBackStarbArrays = new SFVerticalSlider(tacticalElements, 0.12f, -0.01f, 0, new Vector2f(0.48f, -0.345f), TM.sqr4, "knob", "tramp") {
+			
+			@Override
+			public void sliderStopHover(ISlider slider) {
+				
+			}
+			
+			@Override
+			public void sliderStartHover(ISlider slider) {
 				
 			}
 		};
