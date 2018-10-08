@@ -1,9 +1,13 @@
 package fontMeshCreator;
 
+import java.util.List;
+
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector4f;
 
 import fontRendering.TextMaster;
+import renderEngine.guis.IGUI;
+import renderEngine.textures.GUITexture;
 import scene.entities.entityUtils.StatusText;
 
 /**
@@ -12,7 +16,7 @@ import scene.entities.entityUtils.StatusText;
  * @author Karl
  *
  */
-public class GUIText {
+public class GUIText implements IGUI {
 
 	private boolean visible = true;
 	
@@ -72,6 +76,18 @@ public class GUIText {
 	}
 	
 	public GUIText(String text, float fontSize, FontType font, Vector2f position, float maxLineLength,
+			boolean centered, List<IGUI> list) {
+		this.textString = text;
+		this.fontSize = fontSize;
+		this.font = font;
+		this.position = position;
+		this.lineMaxSize = maxLineLength;
+		this.centerText = centered;
+		TextMaster.addText(this);
+		list.add(this);
+	}
+	
+	public GUIText(String text, float fontSize, FontType font, Vector2f position, float maxLineLength,
 			boolean centered, int i) {
 		this.textString = text;
 		this.fontSize = fontSize;
@@ -82,12 +98,15 @@ public class GUIText {
 		TextMaster.addTextToSecondaryBuffer(this);
 	}
 	
+	/**
+	 * Only works if text if visible
+	 */
 	public void setText(String text) {
-		this.textString = text;
-		if (visible) {
+		if (visible &! textString.equals(text)) {
+			this.textString = text;
 			TextMaster.removeText(this);
+			TextMaster.addText(this);
 		}
-		TextMaster.addText(this);
 	}
 
 	/**
@@ -243,6 +262,23 @@ public class GUIText {
 	 */
 	protected String getTextString() {
 		return textString;
+	}
+
+	@Override
+	public void update() {
+		//DO NOTHING
+	}
+
+	@Override
+	public void hide(List<GUITexture> textures) {
+		this.hide();
+		System.out.println("IGUI hide");
+	}
+
+	@Override
+	public void show(List<GUITexture> textures) {
+		this.show();
+		System.out.println("IGUI show");
 	}
 
 }

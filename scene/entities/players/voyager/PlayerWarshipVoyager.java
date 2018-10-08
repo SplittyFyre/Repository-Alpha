@@ -653,7 +653,7 @@ public class PlayerWarshipVoyager extends Player {
 		}
 	};
 	
-	private GUIText rottext = new GUIText("", 1, TM.font, new Vector2f(0, 0), 0.25f, false);
+	private GUIText rottext = new GUIText("", 1, TM.font, new Vector2f(0, 0), 0.25f, false, helmElements);
 	
 	private SFAbstractButton temp = new SFAbstractButton(helmElements, "image", new Vector2f(0.5f, -0.5f), TM.sqr4) {
 		
