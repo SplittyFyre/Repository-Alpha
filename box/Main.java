@@ -265,7 +265,7 @@ public class Main {
 		BorgVessel borj = new BorgVessel(playerText, new Vector3f(1000, 750, 6000), 0, 0, 0, 20, player);
 		enemies.add(borj);
 		
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < 0; i++) {
 			
 			BorgVessel borj2 = new BorgVessel(borgShip, new Vector3f(random.nextFloat() * 100000, random.nextFloat() 
 					* 100, random.nextFloat() * 100000), 0, 0, 0, 300, player);

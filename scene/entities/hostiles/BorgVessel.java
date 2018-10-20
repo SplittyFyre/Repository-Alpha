@@ -59,7 +59,7 @@ public class BorgVessel extends Enemy {
 	
 	public void update() {
 		
-		Vector3f vec = SFMath.rotateToFaceVector(super.getPosition(), new Vector3f(player.getPlayerPos().x, player.getPlayerPos().y + 5, player.getPlayerPos().z));
+		Vector3f vec = SFMath.rotateToFaceVector(super.getPosition(), new Vector3f(player.getPlayerPos().x, player.getPlayerPos().y, player.getPlayerPos().z));
 		
 		float dist = SFMath.distance(player.getPlayerPos(), super.getPosition());
 		
@@ -102,11 +102,24 @@ public class BorgVessel extends Enemy {
 				flag = false;
 			}
 			
-			if (TM.rng.nextInt(150) == 7) {
+			if (beaming) {
+				beamcounter += DisplayManager.getFrameTime();
+
+				if (beamcounter > 1) {
+					beaming = false;
+				}
+
 				Main.foeprojectiles.add(new Bolt(privatePhaserTexture, 
 						new Vector3f(super.getPosition()), 
-						-(vec.x), vec.y + (float) Math.random(), 0, 
-						1.5f, 1.5f, 75, 75, 0));
+						-(vec.x), vec.y, 0, 
+						1.5f, 1.5f, 15, 40, 0));
+			}
+			else {
+				beamcounter += DisplayManager.getFrameTime();
+				if (beamcounter >= 3) {
+					beaming = true;
+					beamcounter = 0;
+				}
 			}
 			
 			vec = SFMath.rotateToFaceVector(new Vector3f(super.getPosition().x, super.getPosition().y + 400, super.getPosition().z),
