@@ -14,6 +14,9 @@ public class Torpedo extends Projectile {
 	public static final float PT = 250;
 	public static final float QT = 400;
 	
+	public static final float PE = 40;
+	public static final float QE = 70;
+	
 	private float elapsedTime = 0;
 	private float lifeLength = 4;
 	
@@ -73,7 +76,7 @@ public class Torpedo extends Projectile {
 		else
 			TM.explosionParticleSystem.generateParticles(this.getPosition());
 		
-		/*AudioEngine.playTempSrc(AudioEngine.loadSound("res/explosion.wav"), 150, 
+		/*AudioEngine.playTempSrc(AudioEngine.loadSound("explosion"), 150, 
 				super.getPosition().x, 
 				super.getPosition().y, 
 				super.getPosition().z);*/

@@ -44,7 +44,7 @@ import utils.FloatingOrigin;
 import utils.RaysCast;
 import utils.SFMath;
 
-public class PlayerWarshipVoyager extends Player {
+public class PlayerVoyager extends Player {
 	
 	static Vector2f panelpos = new Vector2f(0.65f, -0.3f);
 	static Vector2f schmpos = Vector2f.add(panelpos, new Vector2f(-0.2455f, 0), null);
@@ -800,7 +800,7 @@ public class PlayerWarshipVoyager extends Player {
 	
 	//BOOKMARK: OPS VARS
 	
-	private static final int MAX_ENERGY = 1000000;
+	private static final int MAX_ENERGY = 1000;
 	
 	private float energyCounter = 0;
 	
@@ -816,7 +816,7 @@ public class PlayerWarshipVoyager extends Player {
 	TexturedModel privateTorpedoTexture = new TexturedModel(pretorpedo, new ModelTexture(Loader.loadTexture("photon")));
 	TexturedModel privateSpecialTorpedoTexture = new TexturedModel(pretorpedo, new ModelTexture(Loader.loadTexture("quantum")));
 	
-	public PlayerWarshipVoyager(TexturedModel model, Vector3f position, float rotX, float rotY, float rotZ, float scale, List<GUITexture> guin) {
+	public PlayerVoyager(TexturedModel model, Vector3f position, float rotX, float rotY, float rotZ, float scale, List<GUITexture> guin) {
 		super(model, position, rotX, rotY, rotZ, scale, guin);
 		
 		privatePhaserTexture.getTexture().setUseFakeLighting(true);
@@ -978,7 +978,7 @@ public class PlayerWarshipVoyager extends Player {
 		coordsX.setText(Float.toString(super.getPosition().x));
 		coordsY.setText(Float.toString(super.getPosition().y));
 		coordsZ.setText(Float.toString(super.getPosition().z));
-		gridText.setText(FloatingOrigin.getGridX() + ", " + FloatingOrigin.getGridZ());
+		gridText.setText("Grid: " + FloatingOrigin.getGridX() + ", " + FloatingOrigin.getGridZ());
 		
 		rottext.setText(Float.toString(UPWARDS_ROT_CAP));
 		
@@ -1102,16 +1102,16 @@ public class PlayerWarshipVoyager extends Player {
 		if (energyCounter > 1 && ENERGY < MAX_ENERGY) {
 			if (ENERGY < MAX_ENERGY * 0.9) {
 				if (ENERGY > MAX_ENERGY * 0.5) {
-					ENERGY += 50;
+					ENERGY += 20;
 				}
 				else if (ENERGY > MAX_ENERGY * 0.3) {
-					ENERGY += 100;
+					ENERGY += 55;
 				}
 				else if (ENERGY > MAX_ENERGY * 0.2f) {
-					ENERGY += 150;
+					ENERGY += 70;
 				}
 				else {
-					ENERGY += 350;
+					ENERGY += 100;
 				}
 			}
 			else {
@@ -1385,74 +1385,98 @@ public class PlayerWarshipVoyager extends Player {
 	
 	void fire_port_front_phaser() {
 		
-		leftPhaserTimer += DisplayManager.getFrameTime();
+		if (ENERGY > 0) {
 		
-		if (leftPhaserTimer > 0.005f) {		
-			projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(4, 22.375f, 40 + distMoved)),
-					20, super.getRotX(), super.getRotY(), 0, this.currentSpeed));
-			ENERGY--;
-			leftPhaserTimer = 0;
+			leftPhaserTimer += DisplayManager.getFrameTime();
+			
+			if (leftPhaserTimer > 0.005f) {		
+				projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(4, 22.375f, 40 + distMoved)),
+						20, super.getRotX(), super.getRotY(), 0, this.currentSpeed));
+				ENERGY--;
+				leftPhaserTimer = 0;
+			}
+		
 		}
 		
 	}
 	
 	void fire_center_front_phaser() {
 		
-		centerPhaserTimer += DisplayManager.getFrameTime();
-		
-		if (centerPhaserTimer > 0.005f) {
-			projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-0.75f, 20.9f, 54 + distMoved)),
-					20, super.getRotX(), super.getRotY(), 0, this.currentSpeed));
-			ENERGY--;
-			centerPhaserTimer = 0;
+		if (ENERGY > 0) {
+			
+			centerPhaserTimer += DisplayManager.getFrameTime();
+			
+			if (centerPhaserTimer > 0.005f) {
+				projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-0.75f, 20.9f, 54 + distMoved)),
+						20, super.getRotX(), super.getRotY(), 0, this.currentSpeed));
+				ENERGY--;
+				centerPhaserTimer = 0;
+			}
+			
 		}
 		
 	}
 	
 	void fire_starb_front_phaser() {
 		
-		rightPhaserTimer += DisplayManager.getFrameTime();
-		
-		if (rightPhaserTimer > 0.005f) {
-			projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-5, 22.375f, 40 + distMoved)),
-					20, super.getRotX(), super.getRotY(), 0, this.currentSpeed));
-			ENERGY--;
-			rightPhaserTimer = 0;
+		if (ENERGY > 0) {
+			
+			rightPhaserTimer += DisplayManager.getFrameTime();
+			
+			if (rightPhaserTimer > 0.005f) {
+				projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-5, 22.375f, 40 + distMoved)),
+						20, super.getRotX(), super.getRotY(), 0, this.currentSpeed));
+				ENERGY--;
+				rightPhaserTimer = 0;
+			}
+			
 		}
 		
 	}
 	
 	void fireFrontPhasers() {
 		
-		mainPhaserTimer += DisplayManager.getFrameTime();
-		
-		if (mainPhaserTimer > 0.005f) {
+		if (ENERGY >= 3) {
 			
-			projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-5, 22.375f, 40 + distMoved)),
-					20, super.getRotX(), super.getRotY(), 0, this.currentSpeed));
+			mainPhaserTimer += DisplayManager.getFrameTime();
 			
-			projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-0.75f, 20.9f, 54 + distMoved)),
-					20, super.getRotX(), super.getRotY(), 0, this.currentSpeed));
+			if (mainPhaserTimer > 0.005f) {
+				
+				projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-5, 22.375f, 23.7f + distMoved)),
+						20, super.getRotX(), super.getRotY(), super.getRotZ(), this.currentSpeed));
+				
+				projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-0.75f, 20.9f, 37.7f + distMoved)),
+						20, super.getRotX(), super.getRotY(), super.getRotZ(), this.currentSpeed));
+				
+				projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(4, 22.375f, 23.7f + distMoved)),
+						20, super.getRotX(), super.getRotY(), super.getRotZ()  , this.currentSpeed));
+				
+				ENERGY -= 3;
+				mainPhaserTimer = 0;
+			}
 			
-			projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(4, 22.375f, 40 + distMoved)),
-					20, super.getRotX(), super.getRotY(), 0, this.currentSpeed));
-			
-			ENERGY -= 3;
-			mainPhaserTimer = 0;
 		}
 	
 	}
 	
 	void fire_port_front_photon() {
-		projectiles.add(Torpedo.photonTorpedo(this.currentSpeed + 4500, super.getRotY(), super.getRotX(), 
-				ModelSys.pos(super.tmat, new Vector3f(5, 11, 11))));
-		ENERGY -= 40;
+		
+		if (ENERGY >= Torpedo.PE) {
+			projectiles.add(Torpedo.photonTorpedo(this.currentSpeed + 4500, super.getRotY(), super.getRotX(), 
+					ModelSys.pos(super.tmat, new Vector3f(5, 11, 11))));
+			ENERGY -= Torpedo.PE;
+		}
+		
 	}
 	
 	void fire_starb_front_photon() {
-		projectiles.add(Torpedo.photonTorpedo(this.currentSpeed + 4500, super.getRotY(), super.getRotX(), 
-				ModelSys.pos(super.tmat, new Vector3f(-5, 11, 11))));
-		ENERGY -= 40;
+		
+		if (ENERGY >= Torpedo.PE) {
+			projectiles.add(Torpedo.photonTorpedo(this.currentSpeed + 4500, super.getRotY(), super.getRotX(), 
+					ModelSys.pos(super.tmat, new Vector3f(-5, 11, 11))));
+			ENERGY -= Torpedo.PE;
+		}
+		
 	}
 	
 	void fireFrontPhotons() {
@@ -1461,15 +1485,23 @@ public class PlayerWarshipVoyager extends Player {
 	}
 	
 	void fire_port_front_quantum() {
-		projectiles.add(Torpedo.quantumTorpedo(this.currentSpeed + 4500, super.getRotY(), super.getRotX(), 
-				ModelSys.pos(super.tmat, new Vector3f(5, 11, 11))));
-		ENERGY -= 70;
+		
+		if (ENERGY >= Torpedo.QE) {
+			projectiles.add(Torpedo.quantumTorpedo(this.currentSpeed + 4500, super.getRotY(), super.getRotX(), 
+					ModelSys.pos(super.tmat, new Vector3f(5, 11, 11))));
+			ENERGY -= Torpedo.QE;
+		}
+		
 	}
 	
 	void fire_starb_front_quantum() {
-		projectiles.add(Torpedo.quantumTorpedo(this.currentSpeed + 4500, super.getRotY(), super.getRotX(), 
-				ModelSys.pos(super.tmat, new Vector3f(-5, 11, 11))));
-		ENERGY -= 70;
+		
+		if (ENERGY >= Torpedo.QE) {
+			projectiles.add(Torpedo.quantumTorpedo(this.currentSpeed + 4500, super.getRotY(), super.getRotX(), 
+					ModelSys.pos(super.tmat, new Vector3f(-5, 11, 11))));
+			ENERGY -= Torpedo.QE; 
+		}
+		
 	}
 	
 	void fireFrontQuantums() {
@@ -1492,10 +1524,8 @@ public class PlayerWarshipVoyager extends Player {
 		Vector3f rots;
 		Vector3f firing;
 		
-		float rough = SFMath.rotateToFaceVector(ModelSys.pos(tmat, new Vector3f(9, 20, 57.5f)), this.target.getPosition()).y;
-		
 		if (mode) {
-			firing = ModelSys.pos(SFMath.createTransformationMatrix(getPosition(), super.getRotX(), rough, super.getRotZ(), 1), new Vector3f(9, 20, 57.5f));
+			firing = ModelSys.pos(super.tmat, new Vector3f(9, 20, 57.5f));
 		}
 		else {
 			firing = ModelSys.pos(super.tmat, new Vector3f(10, 20, 45));
@@ -1573,19 +1603,37 @@ public class PlayerWarshipVoyager extends Player {
 	
 	void fireBackMountedPhaser() {
 		
-		projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-0.5f, 21, -21)),
+		projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-0.5f, 21, -5)),
 				10, -super.getRotX(), super.getRotY() + 180, super.getRotZ(), this.currentSpeed));
 		
 		ENERGY -= 1.5f;
 		
 	}
 	
+	void fireBackMountedTorpedo() {
+		
+		projectiles.add(Torpedo.photonTorpedo(-4500, super.getRotY(), super.getRotX(), 
+				ModelSys.pos(super.tmat, new Vector3f(0, 20, -10))));
+		
+		ENERGY -= 40;
+		
+	}
+	
 	void fireBackEndPhaser() {
 		
-		projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-0.5f, 6.1f, -57)),
+		projectiles.add(Bolt.phaser(ModelSys.pos(super.tmat, new Vector3f(-0.5f, 6.1f, -41.6f)),
 				10, -super.getRotX(), super.getRotY() + 180, super.getRotZ(), this.currentSpeed)); 
 		
 		ENERGY -= 1.5f;
+		
+	}
+	
+	void fireBackEndTorpedo() {
+		
+		projectiles.add(Torpedo.photonTorpedo(-4500, super.getRotY(), super.getRotX(), 
+				ModelSys.pos(super.tmat, new Vector3f(-0.5f, 15, -45))));
+		
+		ENERGY -= 40;
 		
 	}
 	

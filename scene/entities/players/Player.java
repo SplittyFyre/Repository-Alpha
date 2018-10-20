@@ -95,7 +95,7 @@ public abstract class Player extends Entity implements ITakeDamage {
 	
 	protected void prerequisite() {
 		tmat = SFMath.createTransformationMatrix(super.getPosition(),
-			super.getRotX(), super.getRotY(), super.getRotZ(), new Vector3f(1, 1, 1));
+			super.getRotX(), super.getRotY(), super.getRotZ(), 1);
 	}
 	
 	public List<Projectile> getProjectiles() {

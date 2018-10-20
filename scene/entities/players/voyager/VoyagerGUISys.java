@@ -15,8 +15,8 @@ import renderEngine.textures.GUITexture;
 
 public class VoyagerGUISys {
 	
-	private static Vector2f panelpos = PlayerWarshipVoyager.panelpos;
-	private static Vector2f schmpos = PlayerWarshipVoyager.schmpos;
+	private static Vector2f panelpos = PlayerVoyager.panelpos;
+	private static Vector2f schmpos = PlayerVoyager.schmpos;
 	//schmpos = [0.4045, -0.3f]
 	
 	private static GUITexture gui_panel = new GUITexture(Loader.loadTexture("LCARSpanel"), panelpos, new Vector2f(0.35f, 0.7f));
@@ -28,9 +28,9 @@ public class VoyagerGUISys {
 	private static List<IGUI> helmElements;
 	private static List<IGUI> miscElements;
 	
-	private static PlayerWarshipVoyager player;
+	private static PlayerVoyager player;
 	
-	public VoyagerGUISys(PlayerWarshipVoyager player) {
+	public VoyagerGUISys(PlayerVoyager player) {
 		tacticalElements = player.tacticalElements;
 		opsElements = player.opsElements;
 		helmElements = player.helmElements;
@@ -69,6 +69,9 @@ public class VoyagerGUISys {
 	SFAbstractButton toggleshields;
 	SFAbstractButton buttonBackMountedPhaser;
 	SFAbstractButton buttonBackEndPhaser;
+	
+	SFAbstractButton buttonBackMountedTorpedo;
+	SFAbstractButton buttonBackEndTorpedo;
 	
 	private void setupTactical() {
 		
@@ -682,7 +685,7 @@ public class VoyagerGUISys {
 			
 		};
 		
-		//BOOKMARK fire aft mounted phaser gun
+		//BOOKMARK fire backmost phaser gun
 		buttonBackEndPhaser = new SFAbstractButton(tacticalElements, "rect", schmpos, new Vector2f(-0.0045f, -0.34f), TM.sqr4) {
 
 			@Override
@@ -710,6 +713,66 @@ public class VoyagerGUISys {
 					
 			}
 				
+		};
+		
+		int a9 = Loader.loadTexture("junction");
+		int b9 = Loader.loadTexture("junctionfilled");
+		//BOOKMARK fire aft mounted torpedo
+		buttonBackMountedTorpedo = new SFAbstractButton(tacticalElements, "junction", schmpos, new Vector2f(-0.0045f, 0), TM.sqr4) {
+			
+			@Override
+			public void whileHovering(IButton button) {
+				
+			}
+			
+			@Override
+			public void whileHolding(IButton button) {
+				
+			}
+			
+			@Override
+			public void onStopHover(IButton button) {
+				this.getTexture().setTexture(a9);
+			}
+			
+			@Override
+			public void onStartHover(IButton button) {
+				this.getTexture().setTexture(b9);
+			}
+			
+			@Override
+			public void onClick(IButton button) {
+				player.fireBackMountedTorpedo();
+			}
+		};
+		
+		//BOOKMARK fire backmost torpedo
+		buttonBackEndTorpedo = new SFAbstractButton(tacticalElements, "junction", schmpos, new Vector2f(-0.0045f, -0.1f), TM.sqr4) {
+			
+			@Override
+			public void whileHovering(IButton button) {
+				
+			}
+			
+			@Override
+			public void whileHolding(IButton button) {
+				
+			}
+			
+			@Override
+			public void onStopHover(IButton button) {
+				this.getTexture().setTexture(a9);
+			}
+			
+			@Override
+			public void onStartHover(IButton button) {
+				this.getTexture().setTexture(b9);
+			}
+			
+			@Override
+			public void onClick(IButton button) {
+				player.fireBackEndTorpedo();
+			}
 		};
 		
 	}

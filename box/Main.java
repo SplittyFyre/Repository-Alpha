@@ -41,7 +41,7 @@ import scene.entities.hostiles.Enemy;
 import scene.entities.players.Player;
 import scene.entities.players.PlayerBirdOfPrey;
 import scene.entities.players.trubble.PlayerTrubble;
-import scene.entities.players.voyager.PlayerWarshipVoyager;
+import scene.entities.players.voyager.PlayerVoyager;
 import scene.entities.projectiles.Projectile;
 import scene.particles.ParticleWatcher;
 import scene.terrain.Island;
@@ -217,7 +217,7 @@ public class Main {
 		switch (p) {
 		
 		case 0:
-			player = new PlayerWarshipVoyager(voyagerShip, new Vector3f(0, 0, 0), 0, 0, 0, 10, guis);
+			player = new PlayerVoyager(voyagerShip, new Vector3f(0, 0, 0), 0, 0, 0, 10, guis);
 			entities.add(player);
 			break;
 			
@@ -388,7 +388,7 @@ public class Main {
 		
 		src.stop();
 		
-		GUIText version = new GUIText("Version 0.0.01", 0.65f, TM.font, new Vector2f(0, 0.9775f), 0.5f, false);
+		GUIText version = new GUIText("Version 1.2.71", 0.65f, TM.font, new Vector2f(0, 0.9775f), 0.5f, false);
 		version.setColour(1, 1, 1);
 		
 		FloatingOrigin.init(player, 200000);

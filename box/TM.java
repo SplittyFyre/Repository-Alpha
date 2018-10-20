@@ -25,7 +25,7 @@ public class TM {
 	public static int quantumsnd = AudioEngine.loadSound("quantum_torpedo");
 	public static int disruptorsnd = AudioEngine.loadSound("klingon_shot");
 	
-	public static RawModel prephaser = OBJParser.loadObjModel("bolt");
+	public static RawModel prephaser = OBJParser.loadObjModel("boltaxis");
 	public static TexturedModel phaserBolt = new TexturedModel(prephaser, new ModelTexture(Loader.loadTexture("orange")));
 	public static TexturedModel phaserBoltBlue = new TexturedModel(prephaser, new ModelTexture(Loader.loadTexture("quantum")));
 	public static TexturedModel greenPhaser = new TexturedModel(prephaser, new ModelTexture(Loader.loadTexture("allGlow")));

@@ -33,6 +33,8 @@ public class BorgVessel extends Enemy {
 	private float movX, movY = 0, movZ;
 	private float counter = 0, counter1 = 0, counter2 = 0, counter3 = 0;
 	private boolean flag = false, flag1 = false, flag2 = false;
+	private float beamcounter = 0;
+	private boolean beaming = false;
 	
 	public float getHealth() {
 		return HEALTH;
@@ -89,7 +91,7 @@ public class BorgVessel extends Enemy {
 						torpmv.x, torpmv.y, 
 						torpmv.z, TM.smlexplosionParticleSystem));
 				
-				if (!player.cloaked) {
+				if (!player.cloaked) { 
 					Main.foeprojectiles.add(new HomingTorpedo(privateTorpedoTexture,
 							new Vector3f(super.getPosition().x, super.getPosition().y, super.getPosition().z), 
 							3, 3, 6.5f, 300, 3100, 15, player, 
