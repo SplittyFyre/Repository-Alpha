@@ -15,7 +15,7 @@ public class Torpedo extends Projectile {
 	public static final float QT = 400;
 	
 	public static final float PE = 40;
-	public static final float QE = 70;
+	public static final float QE = 70 ;
 	
 	private float elapsedTime = 0;
 	private float lifeLength = 4;

@@ -1158,7 +1158,7 @@ public class PlayerVoyager extends Player {
 		super.move(dx, -dy, dz);
 		
 		tracingX = dx;
-		tracingY = dy;
+		tracingY = -dy;
 		tracingZ = dz;
 		distMoved = distanceMoved;
 		

@@ -395,9 +395,10 @@ public class Main {
 		
 		while (!Display.isCloseRequested()) {
 			//sun.setPosition(new Vector3f(random.nextFloat() * 100000, 5000, random.nextFloat() * 100000));
-			
+			//CollisionManager.checkCollisions(player.getProjectiles(), enemies, player, caster);
+
 			player.update(caster);
-			camera.move();
+			camera.move(); 
 			caster.update();
 			AudioEngine.setListenerData(camera.getPosition().x, camera.getPosition().y, camera.getPosition().z);
 			ParticleWatcher.update();

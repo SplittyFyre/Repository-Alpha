@@ -58,10 +58,16 @@ public class BorgVessel extends Enemy {
 	}
 	
 	public void update() {
-		
-		Vector3f vec = SFMath.rotateToFaceVector(super.getPosition(), new Vector3f(player.getPlayerPos().x, player.getPlayerPos().y, player.getPlayerPos().z));
-		
+		//WARNING: EXPERIMENTAL
 		float dist = SFMath.distance(player.getPlayerPos(), super.getPosition());
+		
+		float coeff = (dist / (3200 * DisplayManager.getFrameTime())) * 1.8f;
+		coeff = 0;
+		
+		Vector3f vec = SFMath.rotateToFaceVector(super.getPosition(), Vector3f.add(new Vector3f(player.getPlayerPos().x, player.getPlayerPos().y, player.getPlayerPos().z),
+				new Vector3f(player.tracingX * coeff, player.tracingY * coeff, player.tracingZ * coeff), null));
+		
+		System.out.printf("%f, %f, %f\n", player.tracingX, player.tracingY, player.tracingZ);
 		
 		if (dist > 2000) {
 			//super.move(homingX, homingY, homingZ);
