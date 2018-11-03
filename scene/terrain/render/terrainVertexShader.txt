@@ -1,4 +1,4 @@
-#version 400 core
+#version 330 core
 
 in vec3 position;
 in vec2 textureCoordinates;
@@ -19,7 +19,7 @@ uniform vec3 lightPosition[4];
 
 uniform vec4 plane;
 
-const float density = 0.000075; //PERFECT AMOUT IS 0.0003 WITH GRADIENT 5
+const float density = 0.0000; //PERFECT AMOUT IS 0.000075 WITH GRADIENT 5
 const float gradient = 5;
 
 void main(void){

@@ -39,6 +39,18 @@ public class Loader {
 	private static List<Integer> textures = new ArrayList<Integer>();
 	private static float anisoAmout = Math.min(4, GL11.glGetFloat(EXTTextureFilterAnisotropic.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT));
 	
+	public static RawModel loadToVAO(float[] positions,float[] textureCoords,float[] normals,int[] indices){
+		
+		int vaoID = createVAO();
+		bindIndicesBuffer(indices);
+		storeDataInAttributeList(0,3,positions);
+		storeDataInAttributeList(1,2,textureCoords);
+		storeDataInAttributeList(2,3,normals);
+		unbindVAO();
+		
+		return new RawModel(vaoID,indices.length, null);
+	}
+	
 	public static RawModel loadToVAO(float[] positions, float[] textureCoords, float[] normals, int[] indices, BoundingBox aabb){
 		int vaoID = createVAO();
 		bindIndicesBuffer(indices);

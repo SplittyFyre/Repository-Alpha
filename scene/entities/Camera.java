@@ -12,7 +12,7 @@ public class Camera {
 	
 	private static final float FOV = 70;
 	private static final float NEAR_PLANE = 1f;
-	private static final float FAR_PLANE = 20000;
+	private static final float FAR_PLANE = 200000;
 	private static final float FARTHER_PLANE = 30000;
 	
 	private float distanceFrom = 50;

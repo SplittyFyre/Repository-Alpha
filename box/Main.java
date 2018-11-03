@@ -98,7 +98,7 @@ public class Main {
 		
 		//OTHER TERRAIN STUFF****************************************************************
 		
-		Terrain terrain = new Terrain(0, 0, 0, 4800, texturePack, blendMap, "heightMap");
+		Terrain terrain = new Terrain(0, 0, 0, 4800, texturePack, blendMap);
 		//terrains.add(terrain);
 		
 		//FERNS******************************************************************************
@@ -255,7 +255,8 @@ public class Main {
 					10000, 1750093151);
 		}*/
 		
-		Island home = new Island(texturePack, blendMap, "heightMap", terrains, waters, entities, 0, 0, 0, 10000, 1750093151);
+		Island home = new Island(texturePack, blendMap, terrains, waters, entities, 0, 0, 0, 10000, 1750093151);
+		//Island home = new Island(texturePack, blendMap, terrains, waters, entities, 0, 0, 0, 50000, "tryme2", 5000);
 		WaterTile water = home.getWater();
 		
 		entities.add(new StaticEntity(playerText, new Vector3f(-2500, 750, 2900), 0, 45, 0, 20));

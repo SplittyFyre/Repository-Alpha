@@ -12,7 +12,7 @@ import scene.entities.Camera;
 
 public class SkyboxRenderSystem {
 	
-	private static final float SIZE = 10000f;
+	private static final float SIZE = 100000f;
 	
 	private static final float[] VERTICES = {        
 		    -SIZE,  SIZE, -SIZE,
